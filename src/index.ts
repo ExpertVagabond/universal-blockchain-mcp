@@ -86,50 +86,12 @@ class ZetaChainMCPServer {
   }
 }
 
-// Export the createServer function for Smithery compatibility
-export default function createServer(config?: Record<string, any>) {
-  const server = new ZetaChainMCPServer();
-  
-  if (config) {
-    try {
-      const validatedConfig = configSchema.parse(config);
-      server.updateConfig(validatedConfig);
-    } catch (error) {
-      console.error('Invalid configuration:', error);
-      throw new Error('Configuration validation failed');
-    }
-  }
-  
-  return server;
-}
-
-// Export the config schema for Smithery
-export { configSchema };
+// Export the server class and config schema
+export { ZetaChainMCPServer, configSchema };
 
 // Run the server if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  // Read configuration from environment variables
-  const envConfig: Partial<Config> = {};
-  
-  if (process.env.ZETACHAIN_NETWORK) {
-    envConfig.network = process.env.ZETACHAIN_NETWORK as 'testnet' | 'mainnet';
-  }
-  
-  // HTTP mode removed - stdio transport only (no port conflicts)
-  
-  if (process.env.ZETACHAIN_PRIVATE_KEY) {
-    envConfig.privateKey = process.env.ZETACHAIN_PRIVATE_KEY;
-  }
-  
-  if (process.env.ZETACHAIN_RPC_URL) {
-    envConfig.rpcUrl = process.env.ZETACHAIN_RPC_URL;
-  }
-  
-  if (process.env.ENABLE_ANALYTICS === 'true') {
-    envConfig.enableAnalytics = true;
-  }
-  
-  const server = createServer(envConfig);
+  const server = new ZetaChainMCPServer();
   server.run().catch((error) => {
     console.error('Failed to run server:', error);
     process.exit(1);

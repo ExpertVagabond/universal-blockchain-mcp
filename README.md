@@ -1,65 +1,40 @@
 # ZetaChain MCP Server
 
-A Model Context Protocol (MCP) server that provides access to ZetaChain CLI functionality for AI assistants like Claude.
+A Model Context Protocol server that provides AI assistants with access to ZetaChain blockchain development tools.
 
 ## Features
 
-This MCP server wraps the ZetaChain CLI and provides the following tools:
-
-- **create_contract**: Create new ZetaChain smart contract projects
-- **deploy_contract**: Deploy smart contracts to ZetaChain
-- **query_chain**: Query blockchain data (balances, transactions, blocks)
-- **manage_accounts**: Create and manage ZetaChain accounts
-- **get_balance**: Check account balances
-- **send_transaction**: Prepare and send transactions
-- **list_networks**: Display available networks
-- **generate_wallet**: Create new wallets
+- **8 ZetaChain Tools**: Smart contract creation, deployment, account management, and blockchain queries
+- **MCP Compatible**: Works with Claude Desktop, Cursor, and other MCP clients
+- **TypeScript**: Full type safety with Zod validation
+- **Local & Global CLI**: Supports both local and global ZetaChain CLI installations
 
 ## Installation
-
-### Prerequisites
-
-- Node.js 18+
-- ZetaChain CLI (automatically installed as dependency with latest version)
-
-### Local Installation
-
-1. Clone this repository:
-```bash
-git clone <your-repo-url>
-cd zetachain-mcp-server
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Build the project:
-```bash
-npm run build
-```
-
-### Via NPM (when published)
 
 ```bash
 npm install -g zetachain-mcp-server
 ```
 
-**Note**: The server automatically uses the latest version of ZetaChain CLI as a dependency, ensuring you always have access to the newest features and improvements.
+Or clone and build locally:
 
-## Usage
+```bash
+git clone https://github.com/ExpertVagabond/zetachain-mcp-server.git
+cd zetachain-mcp-server
+npm install
+npm run build
+```
 
-### With Claude Desktop
+## Configuration
 
-Add this configuration to your Claude Desktop config file:
+### Claude Desktop
+
+Add to your Claude Desktop configuration file:
 
 ```json
 {
   "mcpServers": {
     "zetachain": {
-      "command": "node",
-      "args": ["/path/to/zetachain-mcp/dist/index.js"],
+      "command": "zetachain-mcp-server",
       "env": {
         "ZETACHAIN_NETWORK": "testnet"
       }
@@ -68,58 +43,77 @@ Add this configuration to your Claude Desktop config file:
 }
 ```
 
-### With Smithery
+### Local Development
 
-Deploy to Smithery marketplace:
-
-```bash
-npx @smithery/cli deploy .
+```json
+{
+  "mcpServers": {
+    "zetachain": {
+      "command": "node",
+      "args": ["/path/to/zetachain-mcp-server/dist/index.js"],
+      "env": {
+        "ZETACHAIN_NETWORK": "testnet"
+      }
+    }
+  }
+}
 ```
 
-## Configuration
+## Available Tools
 
-The server accepts the following configuration options:
+1. **create_contract** - Create new smart contract projects
+2. **deploy_contract** - Deploy contracts to networks
+3. **query_chain** - Query blockchain data
+4. **manage_accounts** - Account management
+5. **get_balance** - Check balances
+6. **send_transaction** - Send transactions
+7. **list_networks** - Network information
+8. **generate_wallet** - Create wallets
 
-- `network`: Network to connect to (`testnet` | `mainnet`, default: `testnet`)
-- `privateKey`: Private key for transactions (optional)
-- `rpcUrl`: Custom RPC URL (optional)
-- `enableAnalytics`: Enable analytics collection (default: `false`)
+## Usage Examples
+
+### Create a Smart Contract
+
+Ask your AI assistant:
+> "Create a new ZetaChain contract called 'my-token' using the counter template"
+
+### Check Network Information
+
+> "Show me the available ZetaChain networks"
+
+### Manage Accounts
+
+> "List all my ZetaChain accounts"
+
+### Query Blockchain
+
+> "Check the balance for address 0x1234..."
 
 ## Development
 
-### Running locally
-
 ```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Run tests
+npm run test
+
+# Start development
 npm run dev
 ```
 
-### Testing
+## Requirements
 
-```bash
-node test-server.js
-```
-
-## Security Notes
-
-- Never share private keys or expose them in configuration
-- Use environment variables for sensitive data
-- Test on testnets before mainnet operations
-- The server provides transaction preparation but manual confirmation is recommended for sensitive operations
+- Node.js 18+
+- ZetaChain CLI (installed automatically as dependency)
 
 ## License
 
 MIT
 
-## Contributing
+## Repository
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## Support
-
-For issues and questions:
-- GitHub Issues: [Repository Issues](https://github.com/your-username/zetachain-mcp-server/issues)
-- ZetaChain Documentation: [https://docs.zetachain.com](https://docs.zetachain.com)
+https://github.com/ExpertVagabond/zetachain-mcp-server

@@ -50,9 +50,7 @@
     "dist/",
     "README.md",
     "LICENSE",
-    "package.json",
-    "smithery.yaml",
-    "examples/"
+    "package.json"
   ],
   "homepage": "https://github.com/ExpertVagabond/zetachain-mcp-server#readme",
   "bugs": {

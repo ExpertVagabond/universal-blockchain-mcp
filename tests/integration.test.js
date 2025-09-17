@@ -4,7 +4,7 @@ import { spawn } from 'child_process';
 import { setTimeout } from 'timers/promises';
 import assert from 'assert';
 
-console.log('🧪 Comprehensive Integration Test Suite\n');
+console.log('🧪 ZetaChain MCP Server Test Suite\n');
 
 class MCPTestSuite {
   constructor() {
