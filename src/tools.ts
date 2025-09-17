@@ -22,6 +22,11 @@ export interface ZetaChainTools {
   sendTransaction: Tool;
   listNetworks: Tool;
   generateWallet: Tool;
+  // Monitoring and diagnostics tools
+  healthCheck: Tool;
+  getMetrics: Tool;
+  getLogs: Tool;
+  clearCache: Tool;
 }
 
 export const tools: ZetaChainTools = {
@@ -193,6 +198,65 @@ export const tools: ZetaChainTools = {
         }
       },
       required: ['name']
+    }
+  },
+
+  healthCheck: {
+    name: 'health_check',
+    description: 'Check the health status of the ZetaChain MCP server',
+    inputSchema: {
+      type: 'object',
+      properties: {}
+    }
+  },
+
+  getMetrics: {
+    name: 'get_metrics',
+    description: 'Get performance metrics and statistics',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        detailed: {
+          type: 'boolean',
+          description: 'Include detailed metrics (default: false)'
+        }
+      }
+    }
+  },
+
+  getLogs: {
+    name: 'get_logs',
+    description: 'Retrieve recent log entries',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        level: {
+          type: 'string',
+          enum: ['DEBUG', 'INFO', 'WARN', 'ERROR'],
+          description: 'Filter logs by level'
+        },
+        count: {
+          type: 'number',
+          description: 'Number of log entries to retrieve (default: 50)',
+          minimum: 1,
+          maximum: 500
+        }
+      }
+    }
+  },
+
+  clearCache: {
+    name: 'clear_cache',
+    description: 'Clear the server cache to free memory',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        confirm: {
+          type: 'boolean',
+          description: 'Confirm cache clearing (required)',
+        }
+      },
+      required: ['confirm']
     }
   }
 };

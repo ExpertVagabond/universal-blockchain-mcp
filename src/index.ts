@@ -13,6 +13,9 @@ import { z } from 'zod';
 import { configSchema, defaultConfig, Config } from './config.js';
 import { tools } from './tools.js';
 import { handleToolCall } from './handlers.js';
+import { logger } from './logger.js';
+import { performanceMonitor } from './performance.js';
+import { healthMonitor } from './health.js';
 
 class ZetaChainMCPServer {
   private server: Server;
@@ -33,6 +36,11 @@ class ZetaChainMCPServer {
 
     this.config = defaultConfig;
     this.setupHandlers();
+    
+    logger.info('ZetaChain MCP Server initialized', { 
+      version: '1.0.0',
+      network: this.config.network 
+    });
   }
 
   private setupHandlers(): void {
@@ -47,9 +55,10 @@ class ZetaChainMCPServer {
           ...initConfig
         });
         this.config = validatedConfig;
+        logger.info('Configuration updated', { config: validatedConfig });
       } catch (error) {
         // Use default config if validation fails
-        console.error('Configuration validation failed, using defaults:', error);
+        logger.warn('Configuration validation failed, using defaults', {}, error as Error);
       }
 
       return {
@@ -82,7 +91,17 @@ class ZetaChainMCPServer {
   public async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
+    
+    logger.info('ZetaChain MCP Server started', { transport: 'stdio' });
     console.error('ZetaChain MCP Server running on stdio');
+    
+    // Perform initial health check
+    try {
+      await healthMonitor.performHealthCheck(this.config);
+      logger.info('Initial health check completed');
+    } catch (error) {
+      logger.error('Initial health check failed', {}, error as Error);
+    }
   }
 }
 
