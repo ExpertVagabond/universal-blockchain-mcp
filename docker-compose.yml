@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  zetachain-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zetachain-mcp-server:latest
+    container_name: zetachain-mcp-server
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - ZETACHAIN_NETWORK=${ZETACHAIN_NETWORK:-testnet}
+      - ENABLE_ANALYTICS=${ENABLE_ANALYTICS:-false}
+      - RPC_URL=${RPC_URL:-}
+      - PRIVATE_KEY=${PRIVATE_KEY:-}
+    volumes:
+      # Mount for persistent data if needed
+      - zetachain-data:/app/data
+    ports:
+      # MCP servers typically use stdio, but we can expose a health check port
+      - "3000:3000"
+    networks:
+      - zetachain-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # Optional: Add a reverse proxy for HTTP access
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: zetachain-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - zetachain-network
+    depends_on:
+      - zetachain-mcp
+
+volumes:
+  zetachain-data:
+    driver: local
+
+networks:
+  zetachain-network:
+    driver: bridge

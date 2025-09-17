@@ -8,13 +8,27 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "node test-full-server.js",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run test"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "zetachain",
     "blockchain",
-    "smart-contracts"
+    "smart-contracts",
+    "web3",
+    "defi",
+    "cross-chain",
+    "bitcoin",
+    "ethereum",
+    "solana",
+    "ai-tools",
+    "claude",
+    "llm"
   ],
   "author": "ZetaChain Community",
   "license": "MIT",
@@ -32,9 +46,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ExpertVagabond/zetachain-mcp-server.git"
+    "url": "git+https://github.com/ExpertVagabond/zetachain-mcp-server.git"
   },
+  "bugs": {
+    "url": "https://github.com/ExpertVagabond/zetachain-mcp-server/issues"
+  },
+  "homepage": "https://github.com/ExpertVagabond/zetachain-mcp-server#readme",
   "bin": {
     "zetachain-mcp-server": "./dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

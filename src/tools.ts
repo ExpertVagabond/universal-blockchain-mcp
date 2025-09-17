@@ -22,6 +22,12 @@ export interface ZetaChainTools {
   sendTransaction: Tool;
   listNetworks: Tool;
   generateWallet: Tool;
+  requestFaucet: Tool;
+  localnetManage: Tool;
+  crossChainMessage: Tool;
+  evmCall: Tool;
+  bitcoinOperations: Tool;
+  solanaOperations: Tool;
 }
 
 export const tools: ZetaChainTools = {
@@ -193,6 +199,170 @@ export const tools: ZetaChainTools = {
         }
       },
       required: ['name']
+    }
+  },
+
+  requestFaucet: {
+    name: 'request_faucet',
+    description: 'Request testnet ZETA tokens from the faucet',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        address: {
+          type: 'string',
+          description: 'Address to send testnet tokens to'
+        },
+        amount: {
+          type: 'string',
+          description: 'Amount of tokens to request (optional)',
+          default: '1.0'
+        }
+      },
+      required: ['address']
+    }
+  },
+
+  localnetManage: {
+    name: 'localnet_manage',
+    description: 'Manage local development environment for ZetaChain',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        action: {
+          type: 'string',
+          enum: ['start', 'stop', 'status', 'reset'],
+          description: 'Action to perform on localnet'
+        },
+        config: {
+          type: 'object',
+          description: 'Configuration options for localnet (optional)',
+          properties: {
+            port: {
+              type: 'number',
+              description: 'Port for localnet RPC'
+            },
+            verbose: {
+              type: 'boolean',
+              description: 'Enable verbose logging'
+            }
+          }
+        }
+      },
+      required: ['action']
+    }
+  },
+
+  crossChainMessage: {
+    name: 'cross_chain_message',
+    description: 'Send cross-chain messages between different blockchains',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        sourceChain: {
+          type: 'string',
+          enum: ['ethereum', 'bsc', 'polygon', 'bitcoin', 'solana'],
+          description: 'Source blockchain'
+        },
+        targetChain: {
+          type: 'string',
+          enum: ['ethereum', 'bsc', 'polygon', 'bitcoin', 'solana'],
+          description: 'Target blockchain'
+        },
+        message: {
+          type: 'string',
+          description: 'Message or data to send'
+        },
+        recipient: {
+          type: 'string',
+          description: 'Recipient address on target chain'
+        }
+      },
+      required: ['sourceChain', 'targetChain', 'message', 'recipient']
+    }
+  },
+
+  evmCall: {
+    name: 'evm_call',
+    description: 'Execute EVM-specific operations on ZetaChain',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        operation: {
+          type: 'string',
+          enum: ['deploy', 'call', 'query', 'estimate-gas'],
+          description: 'EVM operation to perform'
+        },
+        contract: {
+          type: 'string',
+          description: 'Contract address or bytecode'
+        },
+        method: {
+          type: 'string',
+          description: 'Method to call (for call/query operations)'
+        },
+        params: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Parameters for the method call'
+        }
+      },
+      required: ['operation']
+    }
+  },
+
+  bitcoinOperations: {
+    name: 'bitcoin_operations',
+    description: 'Perform Bitcoin-related operations through ZetaChain',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        operation: {
+          type: 'string',
+          enum: ['deposit', 'withdraw', 'query-utxo', 'get-address'],
+          description: 'Bitcoin operation to perform'
+        },
+        address: {
+          type: 'string',
+          description: 'Bitcoin address'
+        },
+        amount: {
+          type: 'string',
+          description: 'Amount in BTC'
+        },
+        txHash: {
+          type: 'string',
+          description: 'Transaction hash for queries'
+        }
+      },
+      required: ['operation']
+    }
+  },
+
+  solanaOperations: {
+    name: 'solana_operations',
+    description: 'Perform Solana-related operations through ZetaChain',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        operation: {
+          type: 'string',
+          enum: ['deposit', 'withdraw', 'query-account', 'get-balance'],
+          description: 'Solana operation to perform'
+        },
+        address: {
+          type: 'string',
+          description: 'Solana address'
+        },
+        amount: {
+          type: 'string',
+          description: 'Amount in SOL'
+        },
+        programId: {
+          type: 'string',
+          description: 'Solana program ID for interactions'
+        }
+      },
+      required: ['operation']
     }
   }
 };

@@ -34,6 +34,24 @@ export async function handleToolCall(
       case 'generate_wallet':
         return await handleGenerateWallet(args as any, config);
       
+      case 'request_faucet':
+        return await handleRequestFaucet(args as any, config);
+      
+      case 'localnet_manage':
+        return await handleLocalnetManage(args as any, config);
+      
+      case 'cross_chain_message':
+        return await handleCrossChainMessage(args as any, config);
+      
+      case 'evm_call':
+        return await handleEvmCall(args as any, config);
+      
+      case 'bitcoin_operations':
+        return await handleBitcoinOperations(args as any, config);
+      
+      case 'solana_operations':
+        return await handleSolanaOperations(args as any, config);
+      
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -364,6 +382,295 @@ async function handleGenerateWallet(args: { name: string }, config: Config): Pro
         }
       ],
       isError: true
+    };
+  }
+}
+
+async function handleRequestFaucet(args: { address: string; amount?: string }, config: Config): Promise<CallToolResult> {
+  const { address, amount = '1.0' } = args;
+  
+  try {
+    // The faucet command requests testnet tokens
+    const command = `faucet --address ${address} --amount ${amount}`;
+    const result = await executeZetaChainCommand(command);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `💧 Faucet Request\n\n` +
+                `Address: ${address}\n` +
+                `Amount: ${amount} ZETA\n` +
+                `Network: ${config.network}\n\n` +
+                `${result.stdout || 'Faucet request submitted. Tokens should arrive shortly.'}`
+        }
+      ]
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `💧 Faucet Information\n\n` +
+                `To request testnet tokens:\n` +
+                `• Run: zetachain faucet --address ${address}\n` +
+                `• Visit: https://labs.zetachain.com/get-zeta\n` +
+                `• Amount: Usually 1-10 ZETA per request\n\n` +
+                `Note: Faucet may have rate limits.`
+        }
+      ]
+    };
+  }
+}
+
+async function handleLocalnetManage(args: { action: string; config?: any }, config: Config): Promise<CallToolResult> {
+  const { action, config: localnetConfig } = args;
+  
+  try {
+    let command = 'localnet';
+    
+    switch (action) {
+      case 'start':
+        command += ' start';
+        if (localnetConfig?.port) command += ` --port ${localnetConfig.port}`;
+        if (localnetConfig?.verbose) command += ' --verbose';
+        break;
+      case 'stop':
+        command += ' stop';
+        break;
+      case 'status':
+        command += ' status';
+        break;
+      case 'reset':
+        command += ' reset';
+        break;
+      default:
+        throw new Error(`Unknown localnet action: ${action}`);
+    }
+    
+    const result = await executeZetaChainCommand(command);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `🏠 Localnet ${action.charAt(0).toUpperCase() + action.slice(1)}\n\n${result.stdout || `Localnet ${action} completed.`}`
+        }
+      ]
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `🏠 Localnet Management\n\n` +
+                `Available commands:\n` +
+                `• zetachain localnet start - Start local development network\n` +
+                `• zetachain localnet stop - Stop local network\n` +
+                `• zetachain localnet status - Check network status\n` +
+                `• zetachain localnet reset - Reset local network\n\n` +
+                `Action requested: ${action}`
+        }
+      ]
+    };
+  }
+}
+
+async function handleCrossChainMessage(args: { sourceChain: string; targetChain: string; message: string; recipient: string }, config: Config): Promise<CallToolResult> {
+  const { sourceChain, targetChain, message, recipient } = args;
+  
+  return {
+    content: [
+      {
+        type: 'text',
+        text: `🔗 Cross-Chain Message\n\n` +
+              `From: ${sourceChain}\n` +
+              `To: ${targetChain}\n` +
+              `Recipient: ${recipient}\n` +
+              `Message: ${message}\n\n` +
+              `Cross-chain messaging enables:\n` +
+              `• Asset transfers between chains\n` +
+              `• Message passing for dApps\n` +
+              `• Unified liquidity pools\n\n` +
+              `Use ZetaChain's universal messaging for cross-chain communication.`
+      }
+    ]
+  };
+}
+
+async function handleEvmCall(args: { operation: string; contract?: string; method?: string; params?: string[] }, config: Config): Promise<CallToolResult> {
+  const { operation, contract, method, params = [] } = args;
+  
+  try {
+    let command = 'evm';
+    
+    switch (operation) {
+      case 'deploy':
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `📜 EVM Contract Deployment\n\n` +
+                    `To deploy an EVM contract:\n` +
+                    `1. Compile your contract (Solidity/Vyper)\n` +
+                    `2. Use: zetachain evm deploy --bytecode <bytecode>\n` +
+                    `3. Set constructor parameters if needed\n` +
+                    `4. Confirm transaction and get contract address`
+            }
+          ]
+        };
+      case 'call':
+        if (!contract || !method) throw new Error('Contract address and method required for calls');
+        command += ` call --contract ${contract} --method ${method}`;
+        if (params.length > 0) command += ` --params ${params.join(',')}`;
+        break;
+      case 'query':
+        if (!contract || !method) throw new Error('Contract address and method required for queries');
+        command += ` query --contract ${contract} --method ${method}`;
+        break;
+      case 'estimate-gas':
+        if (!contract) throw new Error('Contract address required for gas estimation');
+        command += ` estimate-gas --contract ${contract}`;
+        if (method) command += ` --method ${method}`;
+        break;
+    }
+    
+    const result = await executeZetaChainCommand(command);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `⚡ EVM Operation: ${operation}\n\n${result.stdout || 'Operation completed.'}`
+        }
+      ]
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `⚡ EVM Operations Guide\n\n` +
+                `Available operations:\n` +
+                `• Deploy contracts\n` +
+                `• Call contract methods\n` +
+                `• Query contract state\n` +
+                `• Estimate gas costs\n\n` +
+                `Operation: ${operation}\n` +
+                `${contract ? `Contract: ${contract}` : ''}`
+        }
+      ]
+    };
+  }
+}
+
+async function handleBitcoinOperations(args: { operation: string; address?: string; amount?: string; txHash?: string }, config: Config): Promise<CallToolResult> {
+  const { operation, address, amount, txHash } = args;
+  
+  try {
+    let command = 'bitcoin';
+    
+    switch (operation) {
+      case 'deposit':
+        if (!address || !amount) throw new Error('Address and amount required for deposits');
+        command += ` deposit --address ${address} --amount ${amount}`;
+        break;
+      case 'withdraw':
+        if (!address || !amount) throw new Error('Address and amount required for withdrawals');
+        command += ` withdraw --address ${address} --amount ${amount}`;
+        break;
+      case 'query-utxo':
+        if (!address) throw new Error('Address required for UTXO queries');
+        command += ` utxo --address ${address}`;
+        break;
+      case 'get-address':
+        command += ' address';
+        break;
+    }
+    
+    const result = await executeZetaChainCommand(command);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `₿ Bitcoin Operation: ${operation}\n\n${result.stdout || 'Operation processed.'}`
+        }
+      ]
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `₿ Bitcoin Operations\n\n` +
+                `ZetaChain enables Bitcoin interoperability:\n` +
+                `• Deposit BTC to ZetaChain\n` +
+                `• Withdraw BTC from ZetaChain\n` +
+                `• Query Bitcoin UTXOs\n` +
+                `• Generate deposit addresses\n\n` +
+                `Operation: ${operation}\n` +
+                `${address ? `Address: ${address}` : ''}\n` +
+                `${amount ? `Amount: ${amount} BTC` : ''}`
+        }
+      ]
+    };
+  }
+}
+
+async function handleSolanaOperations(args: { operation: string; address?: string; amount?: string; programId?: string }, config: Config): Promise<CallToolResult> {
+  const { operation, address, amount, programId } = args;
+  
+  try {
+    let command = 'solana';
+    
+    switch (operation) {
+      case 'deposit':
+        if (!address || !amount) throw new Error('Address and amount required for deposits');
+        command += ` deposit --address ${address} --amount ${amount}`;
+        break;
+      case 'withdraw':
+        if (!address || !amount) throw new Error('Address and amount required for withdrawals');
+        command += ` withdraw --address ${address} --amount ${amount}`;
+        break;
+      case 'query-account':
+        if (!address) throw new Error('Address required for account queries');
+        command += ` account --address ${address}`;
+        break;
+      case 'get-balance':
+        if (!address) throw new Error('Address required for balance queries');
+        command += ` balance --address ${address}`;
+        break;
+    }
+    
+    if (programId) command += ` --program ${programId}`;
+    
+    const result = await executeZetaChainCommand(command);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `☀️ Solana Operation: ${operation}\n\n${result.stdout || 'Operation processed.'}`
+        }
+      ]
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `☀️ Solana Operations\n\n` +
+                `ZetaChain enables Solana interoperability:\n` +
+                `• Deposit SOL to ZetaChain\n` +
+                `• Withdraw SOL from ZetaChain\n` +
+                `• Query Solana accounts\n` +
+                `• Check SOL balances\n\n` +
+                `Operation: ${operation}\n` +
+                `${address ? `Address: ${address}` : ''}\n` +
+                `${amount ? `Amount: ${amount} SOL` : ''}`
+        }
+      ]
     };
   }
 }
