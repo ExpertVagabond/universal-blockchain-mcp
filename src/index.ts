@@ -80,9 +80,11 @@ class ZetaChainMCPServer {
   }
 
   public async run(): Promise<void> {
+    // Always use stdio transport (no network ports used - avoids all port conflicts including macOS port 7000)
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('ZetaChain MCP Server running on stdio');
+    console.error('ZetaChain MCP Server running on stdio (no network ports used - macOS compatible)');
+    console.error('Note: Chain IDs 7000/7001 are ZetaChain network identifiers, not server ports');
   }
 }
 
@@ -108,7 +110,28 @@ export { configSchema };
 
 // Run the server if this file is executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const server = createServer();
+  // Read configuration from environment variables
+  const envConfig: Partial<Config> = {};
+  
+  if (process.env.ZETACHAIN_NETWORK) {
+    envConfig.network = process.env.ZETACHAIN_NETWORK as 'testnet' | 'mainnet';
+  }
+  
+  // HTTP mode removed - stdio transport only (no port conflicts)
+  
+  if (process.env.ZETACHAIN_PRIVATE_KEY) {
+    envConfig.privateKey = process.env.ZETACHAIN_PRIVATE_KEY;
+  }
+  
+  if (process.env.ZETACHAIN_RPC_URL) {
+    envConfig.rpcUrl = process.env.ZETACHAIN_RPC_URL;
+  }
+  
+  if (process.env.ENABLE_ANALYTICS === 'true') {
+    envConfig.enableAnalytics = true;
+  }
+  
+  const server = createServer(envConfig);
   server.run().catch((error) => {
     console.error('Failed to run server:', error);
     process.exit(1);
