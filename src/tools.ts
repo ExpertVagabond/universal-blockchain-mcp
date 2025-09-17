@@ -2,8 +2,16 @@ import { z } from 'zod';
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 const execAsync = promisify(exec);
+
+// Get the path to the local zetachain CLI
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = dirname(__dirname);
+const zetachainPath = join(projectRoot, 'node_modules', '.bin', 'zetachain');
 
 export interface ZetaChainTools {
   createContract: Tool;
@@ -191,7 +199,16 @@ export const tools: ZetaChainTools = {
 
 export async function executeZetaChainCommand(command: string): Promise<{ stdout: string; stderr: string }> {
   try {
-    const result = await execAsync(`zetachain ${command}`);
+    // Try to use local zetachain first, fallback to global if not found
+    let zetachainCmd = zetachainPath;
+    try {
+      await execAsync(`test -f ${zetachainPath}`);
+    } catch {
+      // Fallback to global zetachain if local not found
+      zetachainCmd = 'zetachain';
+    }
+    
+    const result = await execAsync(`${zetachainCmd} ${command}`);
     return result;
   } catch (error: any) {
     throw new Error(`ZetaChain CLI error: ${error.message}`);

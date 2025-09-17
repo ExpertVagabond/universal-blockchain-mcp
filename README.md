@@ -20,7 +20,7 @@ This MCP server wraps the ZetaChain CLI and provides the following tools:
 ### Prerequisites
 
 - Node.js 18+
-- ZetaChain CLI installed globally (`npm install -g zetachain`)
+- ZetaChain CLI (automatically installed as dependency with latest version)
 
 ### Local Installation
 
@@ -45,6 +45,8 @@ npm run build
 ```bash
 npm install -g zetachain-mcp-server
 ```
+
+**Note**: The server automatically uses the latest version of ZetaChain CLI as a dependency, ensuring you always have access to the newest features and improvements.
 
 ## Usage
 
