@@ -197,20 +197,106 @@ export const tools: ZetaChainTools = {
   }
 };
 
-export async function executeZetaChainCommand(command: string): Promise<{ stdout: string; stderr: string }> {
+// Cache for CLI path resolution and command results
+const cliPathCache = new Map<string, string>();
+const commandCache = new Map<string, { result: any; timestamp: number }>();
+const CACHE_TTL = 60000; // 1 minute cache for command results
+
+export async function executeZetaChainCommand(command: string, useCache: boolean = false): Promise<{ stdout: string; stderr: string }> {
   try {
-    // Try to use local zetachain first, fallback to global if not found
-    let zetachainCmd = zetachainPath;
-    try {
-      await execAsync(`test -f ${zetachainPath}`);
-    } catch {
-      // Fallback to global zetachain if local not found
-      zetachainCmd = 'zetachain';
+    // Check cache for recent identical commands (for read-only operations)
+    if (useCache) {
+      const cached = commandCache.get(command);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        console.error(`🚀 Using cached result for: zetachain ${command}`);
+        return cached.result;
+      }
+    }
+
+    // Resolve CLI path with caching
+    let zetachainCmd = await resolveZetaChainCLI();
+    
+    console.error(`🔧 Executing: ${zetachainCmd} ${command}`);
+    const startTime = Date.now();
+    
+    const result = await execAsync(`${zetachainCmd} ${command}`, {
+      timeout: 30000, // 30 second timeout
+      maxBuffer: 1024 * 1024 // 1MB buffer
+    });
+    
+    const executionTime = Date.now() - startTime;
+    console.error(`✅ Command completed in ${executionTime}ms`);
+    
+    // Cache read-only command results
+    if (useCache && isReadOnlyCommand(command)) {
+      commandCache.set(command, { result, timestamp: Date.now() });
+      
+      // Clean old cache entries
+      if (commandCache.size > 100) {
+        const now = Date.now();
+        for (const [key, value] of commandCache.entries()) {
+          if (now - value.timestamp > CACHE_TTL) {
+            commandCache.delete(key);
+          }
+        }
+      }
     }
     
-    const result = await execAsync(`${zetachainCmd} ${command}`);
     return result;
   } catch (error: any) {
+    console.error(`❌ ZetaChain CLI error for command "${command}":`, error.message);
     throw new Error(`ZetaChain CLI error: ${error.message}`);
   }
 }
+
+async function resolveZetaChainCLI(): Promise<string> {
+  const cacheKey = 'zetachain-cli-path';
+  
+  // Check cache first
+  if (cliPathCache.has(cacheKey)) {
+    return cliPathCache.get(cacheKey)!;
+  }
+  
+  let zetachainCmd = zetachainPath;
+  
+  try {
+    // Check if local CLI exists
+    await execAsync(`test -f ${zetachainPath}`);
+    console.error(`📦 Using local ZetaChain CLI: ${zetachainPath}`);
+  } catch {
+    try {
+      // Check if global CLI exists
+      await execAsync('which zetachain');
+      zetachainCmd = 'zetachain';
+      console.error(`🌐 Using global ZetaChain CLI`);
+    } catch {
+      throw new Error('ZetaChain CLI not found. Please install it with: npm install -g zetachain');
+    }
+  }
+  
+  // Cache the resolved path
+  cliPathCache.set(cacheKey, zetachainCmd);
+  return zetachainCmd;
+}
+
+function isReadOnlyCommand(command: string): boolean {
+  const readOnlyCommands = [
+    'query',
+    'accounts list',
+    '--help',
+    '--version',
+    'docs'
+  ];
+  
+  return readOnlyCommands.some(readOnlyCmd => command.includes(readOnlyCmd));
+}
+
+// Clear caches periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of commandCache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      commandCache.delete(key);
+    }
+  }
+}, CACHE_TTL);
