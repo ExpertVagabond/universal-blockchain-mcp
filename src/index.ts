@@ -66,7 +66,7 @@ class ZetaChainMCPServer {
 
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
-        tools: Object.values(tools) as Tool[],
+        tools: Object.values(tools),
       };
     });
 

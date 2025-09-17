@@ -209,8 +209,18 @@ export async function executeZetaChainCommand(command: string): Promise<{ stdout
     }
     
     const result = await execAsync(`${zetachainCmd} ${command}`);
+    
+    // Check if there are any errors in stderr
+    if (result.stderr && result.stderr.trim()) {
+      console.error('ZetaChain CLI stderr:', result.stderr);
+    }
+    
     return result;
   } catch (error: any) {
-    throw new Error(`ZetaChain CLI error: ${error.message}`);
+    // Provide more detailed error information
+    const errorMessage = error.stderr ? 
+      `ZetaChain CLI error: ${error.message}\nStderr: ${error.stderr}` : 
+      `ZetaChain CLI error: ${error.message}`;
+    throw new Error(errorMessage);
   }
 }

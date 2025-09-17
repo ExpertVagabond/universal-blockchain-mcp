@@ -53,6 +53,17 @@ export async function handleToolCall(
 async function handleCreateContract(args: { name: string; template?: string; directory?: string }, config: Config): Promise<CallToolResult> {
   const { name, template = 'hello', directory } = args;
   
+  // Validate required parameters
+  if (!name || typeof name !== 'string') {
+    throw new Error('Contract name is required and must be a string');
+  }
+  
+  // Validate template
+  const validTemplates = ['hello', 'swap', 'nft', 'staking', 'counter'];
+  if (template && !validTemplates.includes(template)) {
+    throw new Error(`Invalid template. Must be one of: ${validTemplates.join(', ')}`);
+  }
+  
   let command = `new ${name}`;
   if (template !== 'hello') {
     command += ` --template ${template}`;
@@ -182,6 +193,24 @@ async function handleGetBalance(args: { address: string; chainId?: string }, con
 async function handleSendTransaction(args: { to: string; amount: string; chainId?: string; data?: string }, config: Config): Promise<CallToolResult> {
   const { to, amount, chainId, data } = args;
   
+  // Validate required parameters
+  if (!to || typeof to !== 'string') {
+    throw new Error('Recipient address is required and must be a string');
+  }
+  if (!amount || typeof amount !== 'string') {
+    throw new Error('Amount is required and must be a string');
+  }
+  
+  // Basic address validation (should start with 0x and be 42 characters)
+  if (!to.startsWith('0x') || to.length !== 42) {
+    throw new Error('Invalid recipient address format. Must be a valid Ethereum address.');
+  }
+  
+  // Validate amount is numeric
+  if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+    throw new Error('Amount must be a positive number');
+  }
+  
   // Note: This is a simplified example. In practice, you'd want more validation and safety checks
   let command = `send ${to} ${amount}`;
   if (chainId) {
@@ -195,7 +224,7 @@ async function handleSendTransaction(args: { to: string; amount: string; chainId
     content: [
       {
         type: 'text',
-        text: `⚠️ Transaction preparation completed.\n\nTo: ${to}\nAmount: ${amount}\nChain: ${chainId || 'default'}\n\nNote: For security, actual transaction sending should be confirmed manually. Use the ZetaChain CLI directly for sensitive operations.`
+        text: `⚠️ Transaction preparation completed.\n\nTo: ${to}\nAmount: ${amount}\nChain: ${chainId || 'default'}\n\nNote: For security, actual transaction sending should be confirmed manually. Use the ZetaChain CLI directly for sensitive operations.\n\nCommand that would be executed: \`${command}\``
       }
     ]
   };
