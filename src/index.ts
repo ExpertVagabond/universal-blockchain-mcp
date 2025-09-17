@@ -5,6 +5,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  InitializeRequestSchema,
   Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
@@ -35,6 +36,34 @@ class ZetaChainMCPServer {
   }
 
   private setupHandlers(): void {
+    this.server.setRequestHandler(InitializeRequestSchema, async (request) => {
+      // Extract configuration from initialize request
+      const initConfig = (request.params as any)?.meta?.config || {};
+      
+      try {
+        // Validate and merge configuration
+        const validatedConfig = configSchema.parse({
+          ...this.config,
+          ...initConfig
+        });
+        this.config = validatedConfig;
+      } catch (error) {
+        // Use default config if validation fails
+        console.error('Configuration validation failed, using defaults:', error);
+      }
+
+      return {
+        protocolVersion: '2024-11-05',
+        capabilities: {
+          tools: {},
+        },
+        serverInfo: {
+          name: 'zetachain-mcp-server',
+          version: '1.0.0',
+        },
+      };
+    });
+
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: Object.values(tools) as Tool[],
