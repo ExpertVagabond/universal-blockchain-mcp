@@ -80,11 +80,9 @@ class ZetaChainMCPServer {
   }
 
   public async run(): Promise<void> {
-    // Always use stdio transport (no network ports used - avoids all port conflicts including macOS port 7000)
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('ZetaChain MCP Server running on stdio (no network ports used - macOS compatible)');
-    console.error('Note: Chain IDs 7000/7001 are ZetaChain network identifiers, not server ports');
+    console.error('ZetaChain MCP Server running on stdio');
   }
 }
 

@@ -8,33 +8,7 @@ export async function handleToolCall(
 ): Promise<CallToolResult> {
   const { name, arguments: args } = request.params;
 
-  // Validate request structure
-  if (!name || typeof name !== 'string') {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: '❌ Error: Tool name is required and must be a string'
-        }
-      ],
-      isError: true
-    };
-  }
-
-  if (!args || typeof args !== 'object') {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: '❌ Error: Tool arguments are required and must be an object'
-        }
-      ],
-      isError: true
-    };
-  }
-
   try {
-    console.error(`🔧 Executing tool: ${name} with args:`, JSON.stringify(args, null, 2));
     
     switch (name) {
       case 'create_contract':
@@ -62,28 +36,14 @@ export async function handleToolCall(
         return await handleGenerateWallet(args as any, config);
       
       default:
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `❌ Error: Unknown tool '${name}'. Available tools: create_contract, deploy_contract, query_chain, manage_accounts, get_balance, send_transaction, list_networks, generate_wallet`
-            }
-          ],
-          isError: true
-        };
+        throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error: any) {
-    console.error(`❌ Tool execution failed for ${name}:`, error);
-    
-    // Provide more detailed error information
-    const errorMessage = error.message || 'Unknown error occurred';
-    const errorDetails = error.stack ? `\n\nStack trace: ${error.stack}` : '';
-    
     return {
       content: [
         {
           type: 'text',
-          text: `❌ Error executing '${name}': ${errorMessage}${process.env.NODE_ENV === 'development' ? errorDetails : ''}`
+          text: `Error: ${error.message}`
         }
       ],
       isError: true
@@ -92,22 +52,6 @@ export async function handleToolCall(
 }
 
 async function handleCreateContract(args: { name: string; template?: string; directory?: string }, config: Config): Promise<CallToolResult> {
-  // Validate required parameters
-  if (!args.name || typeof args.name !== 'string' || args.name.trim() === '') {
-    throw new Error('Contract name is required and must be a non-empty string');
-  }
-
-  // Validate template if provided
-  const validTemplates = ['hello', 'swap', 'nft', 'staking', 'counter'];
-  if (args.template && !validTemplates.includes(args.template)) {
-    throw new Error(`Invalid template '${args.template}'. Valid templates: ${validTemplates.join(', ')}`);
-  }
-
-  // Validate directory path if provided
-  if (args.directory && (typeof args.directory !== 'string' || args.directory.trim() === '')) {
-    throw new Error('Directory must be a non-empty string if provided');
-  }
-
   const { name, template = 'hello', directory } = args;
   
   let command = `new ${name}`;
@@ -127,24 +71,20 @@ async function handleCreateContract(args: { name: string; template?: string; dir
     content: [
       {
         type: 'text',
-        text: `✅ Contract project '${name}' created successfully!\n\n📁 Template: ${template}\n${directory ? `📂 Directory: ${directory}\n` : ''}🔧 Command executed: zetachain ${command}\n\n📋 Output:\n${result.stdout}`
+        text: `✅ Contract project '${name}' created successfully!\n\n${result.stdout}`
       }
     ]
   };
 }
 
 async function handleDeployContract(args: { contractPath: string; network?: string; args?: string[] }, config: Config): Promise<CallToolResult> {
-  const { contractPath, network = config.network, args: constructorArgs = [] } = args;
-  
-  // This would typically involve compilation and deployment
-  // For now, we'll show how to prepare for deployment
-  const result = await executeZetaChainCommand(`--help`);
+  const { contractPath, network = config.network } = args;
   
   return {
     content: [
       {
         type: 'text',
-        text: `🚀 Contract deployment prepared for ${contractPath} on ${network}\n\nNote: Actual deployment requires compilation with hardhat/foundry and deployment scripts.\nRefer to ZetaChain documentation for deployment steps.`
+        text: `🚀 Contract deployment prepared for ${contractPath} on ${network}\n\nNote: Actual deployment requires compilation with hardhat/foundry and deployment scripts.`
       }
     ]
   };
@@ -171,7 +111,7 @@ async function handleQueryChain(args: { queryType: string; address?: string; txH
       throw new Error(`Unsupported query type: ${queryType}`);
   }
 
-  const result = await executeZetaChainCommand(command, true); // Use cache for query operations
+  const result = await executeZetaChainCommand(command);
   
   return {
     content: [
@@ -204,7 +144,7 @@ async function handleManageAccounts(args: { action: string; name?: string; priva
       throw new Error(`Unsupported account action: ${action}`);
   }
 
-  const result = await executeZetaChainCommand(command, action === 'list'); // Use cache for list operations
+  const result = await executeZetaChainCommand(command);
   
   return {
     content: [
@@ -224,7 +164,7 @@ async function handleGetBalance(args: { address: string; chainId?: string }, con
     command += ` --chain ${chainId}`;
   }
 
-  const result = await executeZetaChainCommand(command, true); // Use cache for balance queries
+  const result = await executeZetaChainCommand(command);
   
   return {
     content: [
