@@ -13,3 +13,17 @@ export const defaultConfig: Config = {
   network: 'testnet',
   enableAnalytics: false,
 };
+
+// Validation utilities
+export function validateAddress(address: string): boolean {
+  if (!address || typeof address !== 'string') return false;
+  
+  // Basic validation for common blockchain address formats
+  const addressRegex = /^(0x[a-fA-F0-9]{40}|zeta[a-zA-Z0-9]{39,59}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/;
+  return addressRegex.test(address.trim());
+}
+
+export function sanitizeInput(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  return input.replace(/[^a-zA-Z0-9_-]/g, '');
+}

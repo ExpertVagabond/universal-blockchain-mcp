@@ -1,6 +1,6 @@
 import { CallToolRequest, CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { executeZetaChainCommand } from './tools.js';
-import { Config } from './config.js';
+import { Config, validateAddress, sanitizeInput } from './config.js';
 
 export async function handleToolCall(
   request: CallToolRequest,
@@ -38,11 +38,14 @@ export async function handleToolCall(
         throw new Error(`Unknown tool: ${name}`);
     }
   } catch (error: any) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Tool call error for ${name}:`, error);
+    
     return {
       content: [
         {
           type: 'text',
-          text: `Error: ${error.message}`
+          text: `❌ Error executing ${name}: ${errorMessage}`
         }
       ],
       isError: true
@@ -53,7 +56,18 @@ export async function handleToolCall(
 async function handleCreateContract(args: { name: string; template?: string; directory?: string }, config: Config): Promise<CallToolResult> {
   const { name, template = 'hello', directory } = args;
   
-  let command = `new ${name}`;
+  // Validate contract name
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    throw new Error('Contract name is required and must be a non-empty string');
+  }
+  
+  // Sanitize name to prevent command injection
+  const sanitizedName = name.replace(/[^a-zA-Z0-9_-]/g, '');
+  if (sanitizedName !== name) {
+    throw new Error('Contract name contains invalid characters. Only letters, numbers, hyphens, and underscores are allowed.');
+  }
+  
+  let command = `new ${sanitizedName}`;
   if (template !== 'hello') {
     command += ` --template ${template}`;
   }
@@ -161,6 +175,11 @@ async function handleManageAccounts(args: { action: string; name?: string; priva
 
 async function handleGetBalance(args: { address: string; chainId?: string }, config: Config): Promise<CallToolResult> {
   const { address, chainId } = args;
+  
+  // Validate address format using the utility function
+  if (!validateAddress(address)) {
+    throw new Error('Invalid address format. Please provide a valid blockchain address.');
+  }
   
   let command = `query balance ${address}`;
   if (chainId) {

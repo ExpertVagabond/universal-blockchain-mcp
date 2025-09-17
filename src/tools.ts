@@ -198,6 +198,10 @@ export const tools: ZetaChainTools = {
 };
 
 export async function executeZetaChainCommand(command: string): Promise<{ stdout: string; stderr: string }> {
+  if (!command || typeof command !== 'string') {
+    throw new Error('Invalid command: command must be a non-empty string');
+  }
+
   try {
     // Try to use local zetachain first, fallback to global if not found
     let zetachainCmd = zetachainPath;
@@ -208,9 +212,20 @@ export async function executeZetaChainCommand(command: string): Promise<{ stdout
       zetachainCmd = 'zetachain';
     }
     
-    const result = await execAsync(`${zetachainCmd} ${command}`);
+    console.log(`Executing ZetaChain command: ${zetachainCmd} ${command}`);
+    
+    const result = await execAsync(`${zetachainCmd} ${command}`, {
+      timeout: 30000, // 30 second timeout
+      maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+    });
+    
     return result;
   } catch (error: any) {
-    throw new Error(`ZetaChain CLI error: ${error.message}`);
+    const errorMessage = error.code === 'ENOENT' 
+      ? 'ZetaChain CLI not found. Please install the ZetaChain CLI globally or locally.'
+      : error.message;
+    
+    console.error(`ZetaChain CLI execution failed:`, error);
+    throw new Error(`ZetaChain CLI error: ${errorMessage}`);
   }
 }
