@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "zetachain": {
+      "command": "node",
+      "args": ["/Users/dev/zetachain-mcp/dist/index.js"],
+      "env": {
+        "ZETACHAIN_NETWORK": "testnet"
+      }
+    }
+  }
+}
