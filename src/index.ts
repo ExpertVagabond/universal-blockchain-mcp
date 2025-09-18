@@ -461,7 +461,7 @@ class ZetaChainMCPServer {
   }
 
   private async listAccounts() {
-    const output = await this.executeZetaCommand(['accounts', 'list']);
+    const output = await this.executeZetaCommand(['accounts', 'list', '--json']);
     return {
       content: [
         {
@@ -485,10 +485,7 @@ class ZetaChainMCPServer {
   }
 
   private async getBalances(address: string, chain?: string) {
-    const args = ['query', 'balances', '--address', address];
-    if (chain) {
-      args.push('--chain', chain);
-    }
+    const args = ['query', 'balances', '--evm', address, '--json'];
     
     const output = await this.executeZetaCommand(args);
     return {
@@ -514,9 +511,7 @@ class ZetaChainMCPServer {
   }
 
   private async getFees(from?: string, to?: string) {
-    const args = ['query', 'fees'];
-    if (from) args.push('--from', from);
-    if (to) args.push('--to', to);
+    const args = ['query', 'fees', '--json'];
     
     const output = await this.executeZetaCommand(args);
     return {
