@@ -35,7 +35,7 @@ build:
 
 # Capabilities
 capabilities:
-  tools: 15
+  tools: 16
   transport: ["http", "stdio"]
 
 # Categories
@@ -65,6 +65,8 @@ dependencies:
     - zetachain@latest
   global:
     - zetachain  # Auto-installed via npm package
+  system:
+    - foundry  # Includes forge, cast, anvil, chisel for smart contract development
 
 # Test configuration
 test:

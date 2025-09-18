@@ -28,6 +28,7 @@ A comprehensive Model Context Protocol (MCP) server for ZetaChain blockchain dev
 
 ### 🛠️ Development Tools  
 - **create_project**: Create new universal contract projects with templates
+- **check_foundry**: Verify Foundry (forge, cast, anvil) installation and versions
 
 ## Installation
 
@@ -42,6 +43,7 @@ claude mcp add --transport http zetachain-mcp "https://server.smithery.ai/@Exper
 #### Prerequisites
 - Node.js 18+
 - ZetaChain CLI (installed automatically)
+- Foundry (for smart contract development - installed automatically)
 
 #### Quick Setup
 ```bash
@@ -146,6 +148,7 @@ ZetaChain MCP server supports all ZetaChain connected chains:
 
 - Node.js 18+
 - ZetaChain CLI (installed automatically as dependency)
+- Foundry (for smart contract development - installed automatically)
 
 ## Architecture
 

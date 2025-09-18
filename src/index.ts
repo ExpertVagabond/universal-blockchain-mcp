@@ -371,6 +371,14 @@ class ZetaChainMCPServer {
               }
             }
           }
+        },
+        {
+          name: "check_foundry",
+          description: "Check if Foundry (forge, cast, anvil) is properly installed and working",
+          inputSchema: {
+            type: "object",
+            properties: {}
+          }
         }
       ]
     }));
@@ -425,6 +433,9 @@ class ZetaChainMCPServer {
             
           case "get_network_info":
             return await this.getNetworkInfo(toolArgs.network);
+            
+          case "check_foundry":
+            return await this.checkFoundry();
 
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -680,6 +691,61 @@ class ZetaChainMCPServer {
       };
     } catch (error) {
       throw new Error(`Failed to fetch network info: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async checkFoundry() {
+    try {
+      const checks = ['forge', 'cast', 'anvil'];
+      const results = [];
+      
+      for (const tool of checks) {
+        try {
+          const version = await new Promise<string>((resolve, reject) => {
+            const child = spawn(tool, ['--version'], { stdio: ['pipe', 'pipe', 'pipe'] });
+            let output = '';
+            
+            child.stdout.on('data', (data) => {
+              output += data.toString();
+            });
+            
+            child.on('close', (code) => {
+              if (code === 0) {
+                resolve(output.trim());
+              } else {
+                reject(new Error(`${tool} not found or failed`));
+              }
+            });
+            
+            child.on('error', () => {
+              reject(new Error(`${tool} command not found`));
+            });
+          });
+          
+          results.push(`✅ ${tool}: ${version.split('\n')[0]}`);
+        } catch (error) {
+          results.push(`❌ ${tool}: Not installed or not working`);
+        }
+      }
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Foundry Installation Check:\n${results.join('\n')}\n\nFoundry includes forge (build), cast (interact), and anvil (local node) for smart contract development.`,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error checking Foundry: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+        isError: true,
+      };
     }
   }
 

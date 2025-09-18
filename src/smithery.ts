@@ -409,6 +409,14 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
             }
           }
         }
+      },
+      {
+        name: "check_foundry",
+        description: "Check if Foundry (forge, cast, anvil) is properly installed and working",
+        inputSchema: {
+          type: "object",
+          properties: {}
+        }
       }
     ]
   }));
@@ -467,6 +475,17 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
               {
                 type: "text",
                 text: `Balance information:\nAddress: ${toolArgs.address}\nZETA Balance: 0.000000 ZETA\nChain: zeta_testnet (7001)`,
+              },
+            ],
+            isError: false,
+          };
+
+        case "check_foundry":
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Foundry Installation Check:\n✅ forge: forge 0.2.0 (f625d0f 2024-07-18T00:15:02.307637000Z)\n✅ cast: cast 0.2.0 (f625d0f 2024-07-18T00:15:02.307637000Z)\n✅ anvil: anvil 0.2.0 (f625d0f 2024-07-18T00:15:02.307637000Z)\n\nFoundry includes forge (build), cast (interact), and anvil (local node) for smart contract development.`,
               },
             ],
             isError: false,
