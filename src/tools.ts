@@ -197,6 +197,14 @@ export const tools: ZetaChainTools = {
   }
 };
 
+export class ZetaChainTools {
+  constructor(private config: any) {}
+
+  getToolDefinitions() {
+    return zetaChainTools;
+  }
+}
+
 export async function executeZetaChainCommand(command: string): Promise<{ stdout: string; stderr: string }> {
   try {
     // Try to use local zetachain first, fallback to global if not found

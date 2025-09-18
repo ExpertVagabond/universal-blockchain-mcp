@@ -1,18 +1,3 @@
-node_modules/
-dist/
-*.log
+.smithery
+node_modules
 .env
-.env.local
-.DS_Store
-*.tgz
-*.tar.gz
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-Thumbs.db
-
-# Test files
-test-*.js

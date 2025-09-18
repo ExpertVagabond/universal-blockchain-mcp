@@ -1,22 +1,29 @@
-name: zetachain-mcp-server
-description: Model Context Protocol server for ZetaChain blockchain development tools
-version: 1.0.0
-author: ZetaChain Community
-license: MIT
+runtime: typescript
 
-runtime: node
-entrypoint: dist/index.js
-
-build:
-  - npm install
-  - npm run build
-
-dependencies:
-  node: ">=18"
-
-keywords:
-  - zetachain
-  - blockchain
-  - smart-contracts
-  - mcp
-  - ai-tools
+# User configuration options
+config:
+  network:
+    type: enum
+    values: [testnet, mainnet]
+    default: testnet
+    description: ZetaChain network to connect to
+  
+  privateKey:
+    type: string
+    required: false
+    description: Private key for transactions (optional)
+  
+  rpcUrl:
+    type: string
+    required: false
+    description: Custom RPC URL (optional)
+  
+  enableAnalytics:
+    type: boolean
+    default: false
+    description: Enable analytics collection
+  
+  debug:
+    type: boolean
+    default: false
+    description: Enable debug logging

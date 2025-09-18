@@ -1,99 +1,141 @@
-#!/usr/bin/env node
+/**
+ * ZetaChain MCP Server
+ * Provides AI assistants with access to ZetaChain blockchain development tools
+ */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-  InitializeRequestSchema,
-  Tool,
-} from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
+import { z } from "zod"
+import { ZetaChainTools } from "./tools"
+import { ZetaChainHandlers } from "./handlers"
+import { configSchema as zetaConfigSchema } from "./config"
 
-import { configSchema, defaultConfig, Config } from './config.js';
-import { tools } from './tools.js';
-import { handleToolCall } from './handlers.js';
+// Configuration schema that maps to smithery.yaml
+export const configSchema = z.object({
+	network: z.enum(['testnet', 'mainnet']).default('testnet').describe("ZetaChain network to connect to"),
+	privateKey: z.string().optional().describe("Private key for transactions (optional)"),
+	rpcUrl: z.string().optional().describe("Custom RPC URL (optional)"),
+	enableAnalytics: z.boolean().default(false).describe("Enable analytics collection"),
+	debug: z.boolean().default(false).describe("Enable debug logging"),
+})
 
-class ZetaChainMCPServer {
-  private server: Server;
-  private config: Config;
+export default function createServer({
+	config,
+}: {
+	config: z.infer<typeof configSchema>
+}) {
+	const server = new McpServer({
+		name: "ZetaChain MCP Server",
+		version: "1.0.0",
+	})
 
-  constructor() {
-    this.server = new Server(
-      {
-        name: 'zetachain-mcp-server',
-        version: '1.0.0',
-      },
-      {
-        capabilities: {
-          tools: {},
-        },
-      }
-    );
+	// Initialize ZetaChain tools and handlers
+	const tools = new ZetaChainTools(config)
+	const handlers = new ZetaChainHandlers(config)
 
-    this.config = defaultConfig;
-    this.setupHandlers();
-  }
+	// Register all ZetaChain tools
+	server.registerTool(
+		"create_contract",
+		{
+			title: "Create Contract",
+			description: "Create a new ZetaChain smart contract project",
+			inputSchema: {
+				name: z.string().describe("Contract project name"),
+				template: z.string().optional().describe("Template to use (e.g., 'counter', 'erc20')"),
+			},
+		},
+		async (args) => handlers.createContract(args),
+	)
 
-  private setupHandlers(): void {
-    this.server.setRequestHandler(InitializeRequestSchema, async (request) => {
-      // Extract configuration from initialize request
-      const initConfig = (request.params as any)?.meta?.config || {};
-      
-      try {
-        // Validate and merge configuration
-        const validatedConfig = configSchema.parse({
-          ...this.config,
-          ...initConfig
-        });
-        this.config = validatedConfig;
-      } catch (error) {
-        // Use default config if validation fails
-        console.error('Configuration validation failed, using defaults:', error);
-      }
+	server.registerTool(
+		"deploy_contract", 
+		{
+			title: "Deploy Contract",
+			description: "Deploy a smart contract to ZetaChain",
+			inputSchema: {
+				contractPath: z.string().describe("Path to contract file"),
+				network: z.string().optional().describe("Target network"),
+			},
+		},
+		async (args) => handlers.deployContract(args),
+	)
 
-      return {
-        protocolVersion: '2024-11-05',
-        capabilities: {
-          tools: {},
-        },
-        serverInfo: {
-          name: 'zetachain-mcp-server',
-          version: '1.0.0',
-        },
-      };
-    });
+	server.registerTool(
+		"query_chain",
+		{
+			title: "Query Chain",
+			description: "Query blockchain data (balances, transactions, blocks)",
+			inputSchema: {
+				query: z.string().describe("Query type: 'balance', 'transaction', 'block'"),
+				address: z.string().optional().describe("Address to query"),
+				txHash: z.string().optional().describe("Transaction hash"),
+				blockNumber: z.string().optional().describe("Block number"),
+			},
+		},
+		async (args) => handlers.queryChain(args),
+	)
 
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: Object.values(tools) as Tool[],
-      };
-    });
+	server.registerTool(
+		"manage_accounts",
+		{
+			title: "Manage Accounts", 
+			description: "Create and manage ZetaChain accounts",
+			inputSchema: {
+				action: z.enum(['list', 'create', 'import', 'delete']).describe("Account management action"),
+				name: z.string().optional().describe("Account name"),
+				privateKey: z.string().optional().describe("Private key for import"),
+			},
+		},
+		async (args) => handlers.manageAccounts(args),
+	)
 
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      return await handleToolCall(request, this.config);
-    });
-  }
+	server.registerTool(
+		"get_balance",
+		{
+			title: "Get Balance",
+			description: "Check account balances across networks",
+			inputSchema: {
+				address: z.string().describe("Account address"),
+				network: z.string().optional().describe("Network to check"),
+			},
+		},
+		async (args) => handlers.getBalance(args),
+	)
 
-  public updateConfig(newConfig: Partial<Config>): void {
-    this.config = { ...this.config, ...newConfig };
-  }
+	server.registerTool(
+		"send_transaction",
+		{
+			title: "Send Transaction",
+			description: "Prepare and send transactions",
+			inputSchema: {
+				to: z.string().describe("Recipient address"), 
+				amount: z.string().describe("Amount to send"),
+				network: z.string().optional().describe("Network to use"),
+			},
+		},
+		async (args) => handlers.sendTransaction(args),
+	)
 
-  public async run(): Promise<void> {
-    const transport = new StdioServerTransport();
-    await this.server.connect(transport);
-    console.error('ZetaChain MCP Server running on stdio');
-  }
-}
+	server.registerTool(
+		"list_networks",
+		{
+			title: "List Networks",
+			description: "Display available ZetaChain networks and their information",
+			inputSchema: {},
+		},
+		async (args) => handlers.listNetworks(args),
+	)
 
-// Export the server class and config schema
-export { ZetaChainMCPServer, configSchema };
+	server.registerTool(
+		"generate_wallet",
+		{
+			title: "Generate Wallet",
+			description: "Create new wallets and key pairs",
+			inputSchema: {
+				name: z.string().optional().describe("Wallet name"),
+			},
+		},
+		async (args) => handlers.generateWallet(args),
+	)
 
-// Run the server if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const server = new ZetaChainMCPServer();
-  server.run().catch((error) => {
-    console.error('Failed to run server:', error);
-    process.exit(1);
-  });
+	return server.server
 }

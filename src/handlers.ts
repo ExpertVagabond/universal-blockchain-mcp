@@ -1,6 +1,6 @@
 import { CallToolRequest, CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { executeZetaChainCommand } from './tools.js';
-import { Config } from './config.js';
+import { executeZetaChainCommand } from './tools';
+import { Config } from './config';
 
 export async function handleToolCall(
   request: CallToolRequest,
@@ -231,4 +231,40 @@ async function handleGenerateWallet(args: { name: string }, config: Config): Pro
       }
     ]
   };
+}
+
+export class ZetaChainHandlers {
+  constructor(private config: any) {}
+
+  async createContract(args: any) {
+    return handleCreateContract(args, this.config);
+  }
+
+  async deployContract(args: any) {
+    return handleDeployContract(args, this.config);
+  }
+
+  async queryChain(args: any) {
+    return handleQueryChain(args, this.config);
+  }
+
+  async manageAccounts(args: any) {
+    return handleManageAccounts(args, this.config);
+  }
+
+  async getBalance(args: any) {
+    return handleGetBalance(args, this.config);
+  }
+
+  async sendTransaction(args: any) {
+    return handleSendTransaction(args, this.config);
+  }
+
+  async listNetworks(args: any) {
+    return handleListNetworks(this.config);
+  }
+
+  async generateWallet(args: any) {
+    return handleGenerateWallet(args, this.config);
+  }
 }
