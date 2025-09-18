@@ -1,0 +1,32 @@
+{
+	"name": "zetachain-mcp-server",
+	"version": "1.0.0",
+	"description": "Model Context Protocol server for ZetaChain blockchain development tools",
+	"main": "dist/index.js",
+	"module": "./src/index.ts",
+	"type": "module",
+	"scripts": {
+		"dev": "npx @smithery/cli dev",
+		"build": "npx @smithery/cli build",
+		"start": "node dist/index.js",
+		"prepare": "npm run build"
+	},
+	"keywords": [
+		"mcp",
+		"zetachain",
+		"blockchain",
+		"smart-contracts",
+		"ai-tools"
+	],
+	"author": "ZetaChain Community",
+	"license": "MIT",
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.18.1",
+		"zetachain": "^6.4.0",
+		"zod": "^3.25.46"
+	},
+	"devDependencies": {
+		"@smithery/cli": "^1.2.4",
+		"tsx": "^4.19.4"
+	}
+}
