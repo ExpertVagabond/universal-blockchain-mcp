@@ -1,0 +1,51 @@
+name: zetachain-mcp-server
+description: "Comprehensive ZetaChain MCP server with full CLI integration for cross-chain blockchain development"
+version: 1.0.0
+author: "ZetaChain Community"
+license: MIT
+
+# Entry point for HTTP transport
+entry: "./src/smithery.ts"
+
+# Build configuration
+build:
+  command: "npm run build"
+  output: "./dist"
+
+# Capabilities
+capabilities:
+  tools: 15
+  transport: ["http", "stdio"]
+
+# Categories
+categories:
+  - blockchain
+  - defi
+  - cross-chain
+  - development-tools
+
+# Keywords
+keywords:
+  - zetachain
+  - blockchain
+  - cross-chain
+  - omnichain
+  - defi
+  - web3
+  - smart-contracts
+
+# Environment
+environment:
+  node: ">=18.0.0"
+
+# Dependencies
+dependencies:
+  npm:
+    - zetachain@latest
+  global:
+    - zetachain  # Auto-installed via npm package
+
+# Test configuration
+test:
+  command: "npm test"
+  timeout: 30000

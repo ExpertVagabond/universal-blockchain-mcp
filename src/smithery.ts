@@ -13,24 +13,94 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
   const testMode = true; // Always use test mode for Smithery
 
   const executeZetaCommand = async (args: string[]): Promise<string> => {
-    // Return mock data for Smithery scanning
+    // Always return mock data for Smithery compatibility
     const command = args.join(' ');
+    
     if (command.includes('query chains list')) {
-      return `┌──────────┬────────────────────┬───────┐
-│ Chain ID │ Chain Name         │ Count │
-├──────────┼────────────────────┼───────┤
-│ 97       │ bsc_testnet        │ 20    │
-│ 7001     │ zeta_testnet       │ 3     │
-│ 11155111 │ sepolia_testnet    │ 14    │
-└──────────┴────────────────────┴───────┘`;
+      return `┌──────────┬────────────────────┬───────┬──────────────────────────────────┐
+│ Chain ID │ Chain Name         │ Count │ Tokens                           │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 97       │ bsc_testnet        │ 20    │ USDC.BSC, BNB.BSC                │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 7001     │ zeta_testnet       │ 3     │ -                                │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 11155111 │ sepolia_testnet    │ 14    │ ETH.ETHSEP, USDC.ETHSEP          │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 80002    │ amoy_testnet       │ 32    │ POL.AMOY, USDC.AMOY              │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 84532    │ base_sepolia       │ 32    │ ETH.BASESEP, USDC.BASESEP        │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 901      │ solana_devnet      │ 32    │ SOL.SOL, USDC.SOL                │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 18333    │ btc_signet_testnet │ 2     │ sBTC.BTC                         │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 18334    │ btc_testnet4       │ 10    │ tBTC.BTC                         │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 421614   │ arbitrum_sepolia   │ 5     │ UPKRW.ARBSEP, ETH.ARBSEP         │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 43113    │ avalanche_testnet  │ 20    │ USDC.FUJI, AVAX.FUJI             │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 2015141  │ ton_testnet        │ 1     │ TON.TON                          │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 103      │ sui_testnet        │ 1     │ SUI.SUI, USDC.SUI                │
+├──────────┼────────────────────┼───────┼──────────────────────────────────┤
+│ 1001     │ kaia_testnet       │ 1     │ KAIA.KAIROS                      │
+└──────────┴────────────────────┴───────┴──────────────────────────────────┘`;
     }
+    
     if (command.includes('query tokens list')) {
       return `┌──────────┬──────────────┬────────────────────────────────────────────┐
 │ Chain ID │ Symbol       │ ZRC-20                                     │
 ├──────────┼──────────────┼────────────────────────────────────────────┤
 │ 97       │ USDC.BSC     │ 0x7c8dDa80bbBE1254a7aACf3219EBe1481c6E01d7 │
+├──────────┼──────────────┼────────────────────────────────────────────┤
+│ 97       │ BNB.BSC      │ 0xd97B1de3619ed2c6BEb3860147E30cA8A7dC9891 │
+├──────────┼──────────────┼────────────────────────────────────────────┤
+│ 11155111 │ ETH.ETHSEP   │ 0x05BA149A7bd6dC1F937fA9046A9e05C05f3b18b0 │
+├──────────┼──────────────┼────────────────────────────────────────────┤
+│ 11155111 │ USDC.ETHSEP  │ 0xcC683A782f4B30c138787CB5576a86AF66fdc31d │
+├──────────┼──────────────┼────────────────────────────────────────────┤
+│ 901      │ SOL.SOL      │ 0xADF73ebA3Ebaa7254E859549A44c74eF7cff7501 │
+├──────────┼──────────────┼────────────────────────────────────────────┤
+│ 901      │ USDC.SOL     │ 0xD10932EB3616a937bd4a2652c87E9FeBbAce53e5 │
 └──────────┴──────────────┴────────────────────────────────────────────┘`;
     }
+    
+    if (command.includes('query balances')) {
+      return `[
+  {
+    "chain_id": "7001",
+    "coin_type": "Gas",
+    "decimals": 18,
+    "symbol": "ZETA",
+    "chain_name": "zeta_testnet",
+    "balance": "1.98"
+  }
+]`;
+    }
+    
+    if (command.includes('query fees')) {
+      return `[
+  {
+    "chain_id": "11155111",
+    "gasFeeAmount": "25200441000",
+    "gasFeeDecimals": 18,
+    "gasTokenSymbol": "ETH.ETHSEP",
+    "symbol": "USDC.ETHSEP"
+  }
+]`;
+    }
+    
+    if (command.includes('accounts list')) {
+      return `[
+  {
+    "address": "0x4C1BD93fb098E2eD9b1B0C10Fe4dA9DF2EDC9524",
+    "name": "default",
+    "type": "evm"
+  }
+]`;
+    }
+    
     return 'Test mode: Command executed successfully';
   };
 

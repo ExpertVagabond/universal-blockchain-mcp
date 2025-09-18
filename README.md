@@ -31,7 +31,7 @@ A comprehensive Model Context Protocol (MCP) server for ZetaChain blockchain dev
 
 ## Installation
 
-### Using Claude Code
+### Using Claude Code (Recommended)
 
 ```bash
 claude mcp add --transport http zetachain-mcp "https://server.smithery.ai/@ExpertVagabond/zetachain-mcp-server/mcp"
@@ -39,10 +39,43 @@ claude mcp add --transport http zetachain-mcp "https://server.smithery.ai/@Exper
 
 ### Manual Installation
 
-1. Clone this repository
-2. Install dependencies: `npm install`
-3. Build the project: `npm run build`
-4. Run the server: `npm start`
+#### Prerequisites
+- Node.js 18+
+- ZetaChain CLI (installed automatically)
+
+#### Quick Setup
+```bash
+# Clone and setup everything
+git clone https://github.com/ExpertVagabond/zetachain-mcp-server.git
+cd zetachain-mcp-server
+npm run setup  # Installs dependencies, CLI, and builds project
+```
+
+#### Manual Setup
+```bash
+# 1. Clone repository
+git clone https://github.com/ExpertVagabond/zetachain-mcp-server.git
+cd zetachain-mcp-server
+
+# 2. Install dependencies (includes ZetaChain CLI via npm)
+npm install
+
+# 3. Install ZetaChain CLI globally (optional, recommended)
+npm install -g zetachain@latest
+
+# 4. Build the project
+npm run build
+
+# 5. Run the server
+npm start
+```
+
+#### Using Local ZetaChain Installation
+If you have ZetaChain CLI installed locally, you can specify the path:
+```bash
+export ZETACHAIN_CLI_PATH=/path/to/zetachain
+npm start
+```
 
 ## Development
 

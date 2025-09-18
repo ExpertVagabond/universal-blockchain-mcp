@@ -42,7 +42,10 @@ class ZetaChainMCPServer {
             return 'Test mode: Command executed successfully';
         }
         return new Promise((resolve, reject) => {
-            const child = spawn('npx', ['zetachain', ...args], {
+            // Try local zetachain package first, then global
+            const zetaCommand = process.env.ZETACHAIN_CLI_PATH || 'npx';
+            const zetaArgs = zetaCommand === 'npx' ? ['zetachain', ...args] : args;
+            const child = spawn(zetaCommand, zetaArgs, {
                 stdio: ['pipe', 'pipe', 'pipe']
             });
             let stdout = '';
