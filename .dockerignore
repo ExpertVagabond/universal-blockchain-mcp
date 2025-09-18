@@ -1,0 +1,14 @@
+node_modules
+src/
+tests/
+.git
+.cursor
+.smithery
+.github
+*.md
+!README.md
+*.log
+.DS_Store
+tsconfig.json
+.npmignore
+.gitignore
