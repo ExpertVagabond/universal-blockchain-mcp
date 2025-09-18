@@ -9,9 +9,14 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { spawn } from 'child_process';
 
-// Session configuration schema for Smithery
+// Session configuration schema for Smithery (JSON Schema Draft 07)
 export const configSchema = {
+  $schema: "https://json-schema.org/draft-07/schema#",
+  $id: "https://server.smithery.ai/@ExpertVagabond/zetachain-mcp-server/.well-known/mcp-config",
   type: "object",
+  title: "ZetaChain MCP Server Configuration",
+  description: "Configure your ZetaChain MCP server connection",
+  "x-query-style": "dot+bracket",
   properties: {
     network: {
       type: "string",
@@ -27,8 +32,7 @@ export const configSchema = {
       default: ""
     }
   },
-  title: "ZetaChain MCP Server Configuration",
-  description: "Configure your ZetaChain MCP server connection"
+  additionalProperties: false
 };
 
 // Smithery export format for HTTP transport
