@@ -1,4 +1,5 @@
 runtime: typescript
+remote: true
 
 # User configuration options
 config:
