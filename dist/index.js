@@ -14,6 +14,7 @@ class ZetaChainMCPServer {
         }, {
             capabilities: {
                 tools: {},
+                remote: false,
             },
         });
         this.setupToolHandlers();

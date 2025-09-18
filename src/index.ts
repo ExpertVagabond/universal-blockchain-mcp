@@ -24,6 +24,7 @@ class ZetaChainMCPServer {
       {
         capabilities: {
           tools: {},
+          remote: false,
         },
       }
     );
