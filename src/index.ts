@@ -5,6 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { spawn } from 'child_process';
 import { promisify } from 'util';
@@ -90,6 +91,15 @@ class ZetaChainMCPServer {
   }
 
   private setupToolHandlers() {
+    // Add initialization handler
+    this.server.setRequestHandler(InitializeRequestSchema, async (request) => ({
+      protocolVersion: "2024-11-05",
+      capabilities: {
+        tools: {},
+        experimental: {},
+      },
+    }));
+
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         // Account Management

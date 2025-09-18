@@ -5,12 +5,37 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { spawn } from 'child_process';
+
+// Session configuration schema for Smithery
+export const configSchema = {
+  type: "object",
+  properties: {
+    network: {
+      type: "string",
+      title: "Network",
+      description: "ZetaChain network to connect to",
+      enum: ["testnet", "mainnet"],
+      default: "testnet"
+    },
+    cliPath: {
+      type: "string", 
+      title: "CLI Path",
+      description: "Path to ZetaChain CLI (optional, uses npx if not provided)",
+      default: ""
+    }
+  },
+  title: "ZetaChain MCP Server Configuration",
+  description: "Configure your ZetaChain MCP server connection"
+};
 
 // Smithery export format for HTTP transport
 export default function createZetaChainMCPServer({ sessionId, config }: { sessionId: string, config: any }) {
   const testMode = true; // Always use test mode for Smithery
+  const network = config?.network || "testnet";
+  const cliPath = config?.cliPath || "";
 
   const executeZetaCommand = async (args: string[]): Promise<string> => {
     // Always return mock data for Smithery compatibility
@@ -112,9 +137,19 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
     {
       capabilities: {
         tools: {},
+        experimental: {},
       },
     }
   );
+
+  // Add initialization handler
+  server.setRequestHandler(InitializeRequestSchema, async (request) => ({
+    protocolVersion: "2024-11-05",
+    capabilities: {
+      tools: {},
+      experimental: {},
+    },
+  }));
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
