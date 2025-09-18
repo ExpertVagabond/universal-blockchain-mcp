@@ -110,6 +110,13 @@ npm run dev
 - Node.js 18+
 - ZetaChain CLI (installed automatically as dependency)
 
+## Security Notes
+
+- Never share private keys or expose them in configuration
+- Use environment variables for sensitive data
+- Test on testnets before mainnet operations
+- The server provides transaction preparation but manual confirmation is recommended for sensitive operations
+
 ## License
 
 MIT

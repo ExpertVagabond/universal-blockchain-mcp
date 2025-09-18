@@ -1,8 +1,34 @@
+# Source files (dist is included)
 src/
-tests/
+*.ts
 tsconfig.json
+
+# Development files
+.cursor/
+.git/
+.smithery/
 .github/
 node_modules/
 *.log
-.DS_Store
+
+# Documentation (README.md is included)
+docs/
+*.md
+!README.md
 CLAUDE_SETUP.md
+
+# Test files
+tests/
+test/
+*.test.*
+*.spec.*
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Model Context Protocol server for ZetaChain CLI",
   "main": "dist/index.js",
+  "module": "./src/index.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
+    "dev": "nodemon --exec \"npm run build && npm start\" --watch src --ext ts",
     "start": "node dist/index.js",
     "prepare": "npm run build",
     "test": "node tests/integration.test.js",
@@ -28,12 +29,13 @@
   "author": "ZetaChain Community",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@modelcontextprotocol/sdk": "^1.18.1",
     "zetachain": "^6.3.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "nodemon": "^3.0.0",
     "typescript": "^5.0.0"
   },
   "engines": {
