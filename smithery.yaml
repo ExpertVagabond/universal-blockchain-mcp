@@ -3,7 +3,7 @@ description: "Comprehensive ZetaChain MCP server with full CLI integration for c
 version: 1.0.0
 author: "ZetaChain Community"
 license: MIT
-runtime: "nodejs"
+runtime: "typescript"
 
 # Entry point for HTTP transport
 entry: "./src/smithery.ts"
