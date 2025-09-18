@@ -5,3 +5,20 @@ dist/
 *.log
 .DS_Store
 test-config.json
+
+# Test files (keep for development but don't track)
+test-*.js
+
+# Build artifacts
+.smithery/index.cjs
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Runtime files
+*.pid
+*.tmp
+npm-debug.log*
