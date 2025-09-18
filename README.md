@@ -32,10 +32,41 @@ A comprehensive Model Context Protocol (MCP) server for ZetaChain blockchain dev
 
 ## Installation
 
-### Using Claude Code (Recommended)
+### Method 1: Claude Code CLI (Recommended)
 
 ```bash
 claude mcp add --transport http zetachain-mcp "https://server.smithery.ai/@ExpertVagabond/zetachain-mcp-server/mcp"
+```
+
+### Method 2: Deep Links
+
+**HTTP Transport (Hosted):**
+```
+claude://mcp/install?name=ZetaChain%20MCP%20Server&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fserver.smithery.ai%2F%40ExpertVagabond%2Fzetachain-mcp-server%2Fmcp%22%7D
+```
+
+**stdio Transport (Local):**
+```
+claude://mcp/install?name=ZetaChain%20MCP%20Server&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40smithery%2Fcli%40latest%22%2C%22run%22%2C%22%40ExpertVagabond%2Fzetachain-mcp-server%22%5D%7D
+```
+
+### Method 3: Manual Configuration
+
+**HTTP Configuration:**
+```json
+{
+  "type": "http",
+  "url": "https://server.smithery.ai/@ExpertVagabond/zetachain-mcp-server/mcp"
+}
+```
+
+**stdio Configuration:**
+```json
+{
+  "type": "stdio", 
+  "command": "npx",
+  "args": ["-y", "@smithery/cli@latest", "run", "@ExpertVagabond/zetachain-mcp-server"]
+}
 ```
 
 ### Manual Installation
