@@ -19,7 +19,7 @@ class ZetaChainMCPServer {
     this.testMode = process.env.NODE_ENV === 'test' || process.env.SMITHERY_SCAN === 'true';
     this.server = new Server(
       {
-        name: "zetachain-mcp-server",
+        name: "universal-blockchain-mcp",
         version: "1.0.0",
       },
       {
@@ -97,6 +97,10 @@ class ZetaChainMCPServer {
       capabilities: {
         tools: {},
         experimental: {},
+      },
+      serverInfo: {
+        name: "universal-blockchain-mcp",
+        version: "1.0.0",
       },
     }));
 

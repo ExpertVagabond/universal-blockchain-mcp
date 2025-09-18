@@ -135,7 +135,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
 
   const server = new Server(
     {
-      name: "zetachain-mcp-server",
+      name: "universal-blockchain-mcp",
       version: "1.0.0",
     },
     {
@@ -152,6 +152,10 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
     capabilities: {
       tools: {},
       experimental: {},
+    },
+    serverInfo: {
+      name: "universal-blockchain-mcp",
+      version: "1.0.0",
     },
   }));
 

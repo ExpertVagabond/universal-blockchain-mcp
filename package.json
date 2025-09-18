@@ -1,7 +1,7 @@
 {
-  "name": "zetachain-mcp-server",
+  "name": "universal-blockchain-mcp",
   "version": "1.0.0",
-  "description": "MCP server for ZetaChain blockchain interactions",
+  "description": "Universal Blockchain MCP server for cross-chain development with ZetaChain, Foundry, and multi-chain support",
   "main": "dist/index.js",
   "module": "./src/smithery.ts",
   "type": "module",
