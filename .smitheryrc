@@ -2,7 +2,7 @@
   "name": "zetachain-mcp-server",
   "description": "Comprehensive ZetaChain MCP server with full CLI integration",
   "version": "1.0.0",
-  "entry": "./src/index.ts",
+  "entry": "./src/smithery.ts",
   "build": {
     "command": "npm run build",
     "output": "./dist"
