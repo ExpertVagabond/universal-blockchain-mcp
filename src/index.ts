@@ -24,7 +24,6 @@ class ZetaChainMCPServer {
       {
         capabilities: {
           tools: {},
-          remote: false,
         },
       }
     );
@@ -428,6 +427,7 @@ class ZetaChainMCPServer {
               text: `Error: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
+          isError: true,
         };
       }
     });

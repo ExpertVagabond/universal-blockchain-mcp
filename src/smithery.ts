@@ -112,7 +112,6 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
     {
       capabilities: {
         tools: {},
-        remote: false,
       },
     }
   );
@@ -390,6 +389,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
                 text: `Supported chains:\n${chainsOutput}`,
               },
             ],
+            isError: false,
           };
           
         case "list_tokens":
@@ -401,6 +401,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
                 text: `Token list:\n${tokensOutput}`,
               },
             ],
+            isError: false,
           };
 
         case "get_network_info":
@@ -418,6 +419,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
                 }, null, 2),
               },
             ],
+            isError: false,
           };
 
         case "get_balances":
@@ -428,6 +430,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
                 text: `Balance information:\nAddress: ${toolArgs.address}\nZETA Balance: 0.000000 ZETA\nChain: zeta_testnet (7001)`,
               },
             ],
+            isError: false,
           };
 
         default:
@@ -438,6 +441,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
                 text: `Tool '${name}' executed successfully in test mode`,
               },
             ],
+            isError: false,
           };
       }
     } catch (error) {
@@ -448,6 +452,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
             text: `Error: ${error instanceof Error ? error.message : String(error)}`,
           },
         ],
+        isError: true,
       };
     }
   });
