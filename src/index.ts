@@ -6,6 +6,8 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { spawn } from 'child_process';
+import { promisify } from 'util';
 
 class ZetaChainMCPServer {
   private server: Server;
@@ -27,115 +29,363 @@ class ZetaChainMCPServer {
     this.setupErrorHandling();
   }
 
+  private async executeZetaCommand(args: string[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const child = spawn('npx', ['zetachain', ...args], {
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+
+      child.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve(stdout);
+        } else {
+          reject(new Error(`Command failed with code ${code}: ${stderr}`));
+        }
+      });
+
+      child.on('error', (error) => {
+        reject(error);
+      });
+    });
+  }
+
   private setupToolHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
+        // Account Management
         {
-          name: "get_zetachain_balance",
-          description: "Get ZetaChain ZETA token balance for a specific wallet address on ZetaChain mainnet or testnet",
+          name: "create_account",
+          description: "Create a new ZetaChain account with mnemonic phrase",
+          inputSchema: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "Account name identifier"
+              }
+            },
+            required: ["name"]
+          }
+        },
+        {
+          name: "import_account",
+          description: "Import existing account using private key or mnemonic",
+          inputSchema: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "Account name identifier"
+              },
+              privateKey: {
+                type: "string",
+                description: "Private key to import (optional if mnemonic provided)"
+              },
+              mnemonic: {
+                type: "string", 
+                description: "Mnemonic phrase to import (optional if private key provided)"
+              }
+            },
+            required: ["name"]
+          }
+        },
+        {
+          name: "list_accounts",
+          description: "List all available ZetaChain accounts",
+          inputSchema: {
+            type: "object",
+            properties: {}
+          }
+        },
+        {
+          name: "show_account",
+          description: "Show details of a specific account",
+          inputSchema: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "Account name to show details for"
+              }
+            },
+            required: ["name"]
+          }
+        },
+        
+        // Balance Queries
+        {
+          name: "get_balances",
+          description: "Fetch native and ZETA token balances for an address",
           inputSchema: {
             type: "object",
             properties: {
               address: {
                 type: "string",
-                description: "The wallet address (0x...) to check ZETA balance for",
-                pattern: "^0x[a-fA-F0-9]{40}$"
+                description: "Address to check balances for"
               },
-              network: {
+              chain: {
                 type: "string",
-                description: "Network to query (mainnet or testnet)",
-                enum: ["mainnet", "testnet"],
-                default: "testnet"
+                description: "Chain to query (optional)"
               }
             },
-            required: ["address"],
-          },
+            required: ["address"]
+          }
         },
+
+        // Cross-Chain Operations
         {
-          name: "get_zetachain_network_info",
-          description: "Get current ZetaChain network status, including latest block, chain ID, and validator information",
+          name: "query_cctx",
+          description: "Query cross-chain transaction data in real-time",
           inputSchema: {
             type: "object",
             properties: {
-              network: {
+              hash: {
                 type: "string",
-                description: "Network to query (mainnet or testnet)",
-                enum: ["mainnet", "testnet"],
-                default: "testnet"
+                description: "Cross-chain transaction hash"
               }
             },
-          },
+            required: ["hash"]
+          }
         },
         {
-          name: "estimate_cross_chain_fee",
-          description: "Estimate gas fees for cross-chain transactions between supported chains (Ethereum, BSC, Bitcoin, Polygon, etc.)",
+          name: "get_fees",
+          description: "Fetch omnichain and cross-chain messaging fees",
           inputSchema: {
             type: "object",
             properties: {
-              fromChain: {
+              from: {
                 type: "string",
-                description: "Source chain identifier",
-                enum: ["ethereum", "bsc", "bitcoin", "polygon", "avalanche", "fantom", "zetachain"],
+                description: "Source chain"
               },
-              toChain: {
+              to: {
                 type: "string",
-                description: "Destination chain identifier", 
-                enum: ["ethereum", "bsc", "bitcoin", "polygon", "avalanche", "fantom", "zetachain"],
+                description: "Destination chain"
+              }
+            }
+          }
+        },
+        
+        // ZetaChain Operations
+        {
+          name: "call_contract",
+          description: "Call a contract on a connected chain from ZetaChain",
+          inputSchema: {
+            type: "object",
+            properties: {
+              contract: {
+                type: "string",
+                description: "Contract address to call"
+              },
+              chain: {
+                type: "string", 
+                description: "Target chain"
               },
               amount: {
                 type: "string",
-                description: "Amount to transfer (in wei/satoshi/smallest unit)",
-                pattern: "^[0-9]+$"
+                description: "Amount to send"
               },
-              tokenAddress: {
+              data: {
                 type: "string",
-                description: "Token contract address (for ERC20 tokens, optional for native tokens)",
-                pattern: "^0x[a-fA-F0-9]{40}$"
+                description: "Contract call data"
               }
             },
-            required: ["fromChain", "toChain", "amount"],
-          },
+            required: ["contract", "chain"]
+          }
         },
-      ],
+        {
+          name: "withdraw_tokens",
+          description: "Withdraw tokens from ZetaChain to a connected chain",
+          inputSchema: {
+            type: "object",
+            properties: {
+              amount: {
+                type: "string",
+                description: "Amount to withdraw"
+              },
+              chain: {
+                type: "string",
+                description: "Destination chain"
+              },
+              recipient: {
+                type: "string",
+                description: "Recipient address"
+              },
+              token: {
+                type: "string",
+                description: "Token address (optional for native)"
+              }
+            },
+            required: ["amount", "chain", "recipient"]
+          }
+        },
+        {
+          name: "withdraw_and_call",
+          description: "Withdraw tokens from ZetaChain and call a contract on connected chain",
+          inputSchema: {
+            type: "object",
+            properties: {
+              amount: {
+                type: "string",
+                description: "Amount to withdraw"
+              },
+              chain: {
+                type: "string",
+                description: "Destination chain"
+              },
+              contract: {
+                type: "string",
+                description: "Contract to call"
+              },
+              data: {
+                type: "string", 
+                description: "Contract call data"
+              }
+            },
+            required: ["amount", "chain", "contract"]
+          }
+        },
+
+        // Token Operations
+        {
+          name: "list_tokens",
+          description: "List ZRC-20 tokens",
+          inputSchema: {
+            type: "object",
+            properties: {
+              chain: {
+                type: "string",
+                description: "Chain to filter tokens by"
+              }
+            }
+          }
+        },
+
+        // Chain Operations
+        {
+          name: "list_chains",
+          description: "List all supported chains",
+          inputSchema: {
+            type: "object",
+            properties: {}
+          }
+        },
+
+        // Faucet
+        {
+          name: "request_faucet",
+          description: "Request testnet ZETA tokens from the faucet",
+          inputSchema: {
+            type: "object",
+            properties: {
+              address: {
+                type: "string",
+                description: "Address to send faucet tokens to"
+              }
+            },
+            required: ["address"]
+          }
+        },
+
+        // Development
+        {
+          name: "create_project",
+          description: "Create a new universal contract project",
+          inputSchema: {
+            type: "object",
+            properties: {
+              name: {
+                type: "string",
+                description: "Project name"
+              },
+              template: {
+                type: "string",
+                description: "Project template (hello, swap, etc.)"
+              }
+            },
+            required: ["name"]
+          }
+        },
+
+        // Network Info
+        {
+          name: "get_network_info",
+          description: "Get current ZetaChain network status and information",
+          inputSchema: {
+            type: "object",
+            properties: {
+              network: {
+                type: "string",
+                description: "Network to query (mainnet or testnet)",
+                enum: ["mainnet", "testnet"],
+                default: "testnet"
+              }
+            }
+          }
+        }
+      ]
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
+      const toolArgs = args as Record<string, any> || {};
 
       try {
-        const toolArgs = args as Record<string, any> || {};
-
         switch (name) {
-          case "get_zetachain_balance":
-            if (!toolArgs.address) {
-              throw new Error("Address parameter is required");
-            }
-            if (!this.isValidAddress(toolArgs.address)) {
-              throw new Error("Invalid address format. Address must be a valid Ethereum address (0x...)");
-            }
-            const network = toolArgs.network || "testnet";
-            return await this.getZetaChainBalance(toolArgs.address, network);
-
-          case "get_zetachain_network_info":
-            const networkInfo = toolArgs.network || "testnet";
-            return await this.getZetaChainNetworkInfo(networkInfo);
-
-          case "estimate_cross_chain_fee":
-            if (!toolArgs.fromChain || !toolArgs.toChain || !toolArgs.amount) {
-              throw new Error("fromChain, toChain, and amount parameters are required");
-            }
-            if (!this.isValidAmount(toolArgs.amount)) {
-              throw new Error("Invalid amount format. Amount must be a positive integer in smallest unit (wei/satoshi)");
-            }
-            if (toolArgs.tokenAddress && !this.isValidAddress(toolArgs.tokenAddress)) {
-              throw new Error("Invalid token address format");
-            }
-            return await this.estimateCrossChainFee(
-              toolArgs.fromChain,
-              toolArgs.toChain,
-              toolArgs.amount,
-              toolArgs.tokenAddress
-            );
+          case "create_account":
+            return await this.createAccount(toolArgs.name);
+            
+          case "import_account":
+            return await this.importAccount(toolArgs.name, toolArgs.privateKey, toolArgs.mnemonic);
+            
+          case "list_accounts":
+            return await this.listAccounts();
+            
+          case "show_account":
+            return await this.showAccount(toolArgs.name);
+            
+          case "get_balances":
+            return await this.getBalances(toolArgs.address, toolArgs.chain);
+            
+          case "query_cctx":
+            return await this.queryCCTX(toolArgs.hash);
+            
+          case "get_fees":
+            return await this.getFees(toolArgs.from, toolArgs.to);
+            
+          case "call_contract":
+            return await this.callContract(toolArgs.contract, toolArgs.chain, toolArgs.amount, toolArgs.data);
+            
+          case "withdraw_tokens":
+            return await this.withdrawTokens(toolArgs.amount, toolArgs.chain, toolArgs.recipient, toolArgs.token);
+            
+          case "withdraw_and_call":
+            return await this.withdrawAndCall(toolArgs.amount, toolArgs.chain, toolArgs.contract, toolArgs.data);
+            
+          case "list_tokens":
+            return await this.listTokens(toolArgs.chain);
+            
+          case "list_chains":
+            return await this.listChains();
+            
+          case "request_faucet":
+            return await this.requestFaucet(toolArgs.address);
+            
+          case "create_project":
+            return await this.createProject(toolArgs.name, toolArgs.template);
+            
+          case "get_network_info":
+            return await this.getNetworkInfo(toolArgs.network);
 
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -153,85 +403,216 @@ class ZetaChainMCPServer {
     });
   }
 
-  private isValidAddress(address: string): boolean {
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
-  }
-
-  private isValidAmount(amount: string): boolean {
-    return /^[0-9]+$/.test(amount) && BigInt(amount) > 0;
-  }
-
-  private getNetworkRPC(network: string): string {
-    const networks = {
-      mainnet: "https://zetachain-evm.blockpi.network/v1/rpc/public",
-      testnet: "https://zetachain-athens-evm.blockpi.network/v1/rpc/public"
+  // Implementation methods
+  private async createAccount(name: string) {
+    const output = await this.executeZetaCommand(['accounts', 'create', '--name', name]);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Account creation result:\n${output}`,
+        },
+      ],
     };
-    return networks[network as keyof typeof networks] || networks.testnet;
   }
 
-  private getChainId(network: string): number {
-    const chainIds = {
-      mainnet: 7000,
-      testnet: 7001
-    };
-    return chainIds[network as keyof typeof chainIds] || chainIds.testnet;
-  }
-
-  private async getZetaChainBalance(address: string, network: string = "testnet") {
-    try {
-      const rpcUrl = this.getNetworkRPC(network);
-      const chainId = this.getChainId(network);
-      
-      // Make RPC call to get balance
-      const response = await fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'eth_getBalance',
-          params: [address, 'latest'],
-          id: 1
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(`RPC Error: ${data.error.message}`);
-      }
-
-      const balanceWei = BigInt(data.result);
-      const balanceZeta = Number(balanceWei) / 1e18;
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({
-              address,
-              network,
-              chainId,
-              balance: {
-                wei: data.result,
-                zeta: balanceZeta.toFixed(6),
-                formatted: `${balanceZeta.toFixed(6)} ZETA`
-              }
-            }, null, 2),
-          },
-        ],
-      };
-    } catch (error) {
-      throw new Error(`Failed to fetch balance: ${error instanceof Error ? error.message : String(error)}`);
+  private async importAccount(name: string, privateKey?: string, mnemonic?: string) {
+    const args = ['accounts', 'import', '--name', name];
+    if (privateKey) {
+      args.push('--private-key', privateKey);
+    } else if (mnemonic) {
+      args.push('--mnemonic', mnemonic);
     }
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text", 
+          text: `Account import result:\n${output}`,
+        },
+      ],
+    };
   }
 
-  private async getZetaChainNetworkInfo(network: string = "testnet") {
-    try {
-      const rpcUrl = this.getNetworkRPC(network);
-      const chainId = this.getChainId(network);
+  private async listAccounts() {
+    const output = await this.executeZetaCommand(['accounts', 'list']);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Available accounts:\n${output}`,
+        },
+      ],
+    };
+  }
 
-      // Get latest block
-      const blockResponse = await fetch(rpcUrl, {
+  private async showAccount(name: string) {
+    const output = await this.executeZetaCommand(['accounts', 'show', '--name', name]);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Account details:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async getBalances(address: string, chain?: string) {
+    const args = ['query', 'balances', '--address', address];
+    if (chain) {
+      args.push('--chain', chain);
+    }
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Balance information:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async queryCCTX(hash: string) {
+    const output = await this.executeZetaCommand(['query', 'cctx', '--hash', hash]);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Cross-chain transaction details:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async getFees(from?: string, to?: string) {
+    const args = ['query', 'fees'];
+    if (from) args.push('--from', from);
+    if (to) args.push('--to', to);
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Fee information:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async callContract(contract: string, chain: string, amount?: string, data?: string) {
+    const args = ['zetachain', 'call', '--contract', contract, '--chain', chain];
+    if (amount) args.push('--amount', amount);
+    if (data) args.push('--data', data);
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Contract call result:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async withdrawTokens(amount: string, chain: string, recipient: string, token?: string) {
+    const args = ['zetachain', 'withdraw', '--amount', amount, '--chain', chain, '--recipient', recipient];
+    if (token) args.push('--token', token);
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Withdrawal result:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async withdrawAndCall(amount: string, chain: string, contract: string, data?: string) {
+    const args = ['zetachain', 'withdraw-and-call', '--amount', amount, '--chain', chain, '--contract', contract];
+    if (data) args.push('--data', data);
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Withdraw and call result:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async listTokens(chain?: string) {
+    const args = ['query', 'tokens', 'list'];
+    if (chain) args.push('--chain', chain);
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Token list:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async listChains() {
+    const output = await this.executeZetaCommand(['query', 'chains', 'list']);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Supported chains:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async requestFaucet(address: string) {
+    const output = await this.executeZetaCommand(['faucet', '--address', address]);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Faucet request result:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async createProject(name: string, template?: string) {
+    const args = ['new', name];
+    if (template) args.push('--template', template);
+    
+    const output = await this.executeZetaCommand(args);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Project creation result:\n${output}`,
+        },
+      ],
+    };
+  }
+
+  private async getNetworkInfo(network: string = "testnet") {
+    try {
+      const rpcUrl = network === "mainnet" 
+        ? "https://zetachain-evm.blockpi.network/v1/rpc/public"
+        : "https://zetachain-athens-evm.blockpi.network/v1/rpc/public";
+      
+      const chainId = network === "mainnet" ? 7000 : 7001;
+
+      const response = await fetch(rpcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -242,13 +623,8 @@ class ZetaChainMCPServer {
         })
       });
 
-      const blockData = await blockResponse.json();
-      
-      if (blockData.error) {
-        throw new Error(`RPC Error: ${blockData.error.message}`);
-      }
-
-      const latestBlock = parseInt(blockData.result, 16);
+      const data = await response.json();
+      const latestBlock = parseInt(data.result, 16);
 
       return {
         content: [
@@ -269,50 +645,6 @@ class ZetaChainMCPServer {
       };
     } catch (error) {
       throw new Error(`Failed to fetch network info: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async estimateCrossChainFee(fromChain: string, toChain: string, amount: string, tokenAddress?: string) {
-    try {
-      // This is a simplified estimation - in reality you'd query ZetaChain's cross-chain protocols
-      const chainFeeMultipliers = {
-        ethereum: 1.5,
-        bsc: 0.8,
-        bitcoin: 2.0,
-        polygon: 0.6,
-        avalanche: 0.9,
-        fantom: 0.5,
-        zetachain: 0.3
-      };
-
-      const baseFee = 0.01; // Base fee in ZETA
-      const fromMultiplier = chainFeeMultipliers[fromChain as keyof typeof chainFeeMultipliers] || 1.0;
-      const toMultiplier = chainFeeMultipliers[toChain as keyof typeof chainFeeMultipliers] || 1.0;
-      
-      const estimatedFee = baseFee * fromMultiplier * toMultiplier;
-      const amountBN = BigInt(amount);
-      
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({
-              fromChain,
-              toChain,
-              amount: amount,
-              tokenAddress: tokenAddress || "native",
-              estimatedFee: {
-                zeta: estimatedFee.toFixed(6),
-                usd: (estimatedFee * 0.65).toFixed(2) // Rough ZETA price estimate
-              },
-              warning: "This is an estimated fee. Actual fees may vary based on network congestion and other factors.",
-              recommendation: "Use ZetaChain's official SDK for precise fee estimation in production applications."
-            }, null, 2),
-          },
-        ],
-      };
-    } catch (error) {
-      throw new Error(`Failed to estimate fees: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

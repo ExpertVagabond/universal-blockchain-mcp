@@ -1,12 +1,33 @@
 # ZetaChain MCP Server
 
-A Model Context Protocol (MCP) server for ZetaChain blockchain interactions, providing tools for balance checking, network information, and cross-chain fee estimation.
+A comprehensive Model Context Protocol (MCP) server for ZetaChain blockchain development, providing full access to ZetaChain CLI functionality through AI assistants.
 
 ## Features
 
-- **get_zetachain_balance**: Check ZetaChain token balance for any address
-- **get_zetachain_network_info**: Get current ZetaChain network information
-- **estimate_cross_chain_fee**: Estimate fees for cross-chain transactions
+### 🔐 Account Management
+- **create_account**: Create new ZetaChain accounts with mnemonic phrases
+- **import_account**: Import existing accounts using private keys or mnemonics  
+- **list_accounts**: List all available ZetaChain accounts
+- **show_account**: Show detailed account information
+
+### 💰 Balance & Token Operations
+- **get_balances**: Fetch native and ZETA token balances across chains
+- **list_tokens**: List all ZRC-20 tokens with addresses and chain info
+- **request_faucet**: Request testnet ZETA tokens from the faucet
+
+### 🌐 Cross-Chain Operations
+- **query_cctx**: Query cross-chain transaction data in real-time
+- **get_fees**: Fetch omnichain and cross-chain messaging fees
+- **call_contract**: Call contracts on connected chains from ZetaChain
+- **withdraw_tokens**: Withdraw tokens from ZetaChain to connected chains
+- **withdraw_and_call**: Withdraw tokens and call contracts in one operation
+
+### ⛓️ Network & Chain Information
+- **list_chains**: List all supported chains with IDs and token counts
+- **get_network_info**: Get current ZetaChain network status and information
+
+### 🛠️ Development Tools  
+- **create_project**: Create new universal contract projects with templates
 
 ## Installation
 
@@ -39,48 +60,68 @@ npm run build
 npm start
 ```
 
-## Usage
+## Usage Examples
 
-Once added to Claude, you can use the following tools:
+Once added to Claude, you can use all ZetaChain functionality through natural language:
 
-### Check Balance
+### Account Management
 ```
-What's the ZETA balance for address 0x1234...?
-```
-
-### Get Network Info
-```
-Show me the current ZetaChain network status
+Create a new ZetaChain account called "my-wallet"
+Import my existing account using this private key: 0x...
+Show me all my ZetaChain accounts
 ```
 
-### Estimate Cross-Chain Fees
+### Cross-Chain Operations
 ```
-What would it cost to send 100 ZETA from Ethereum to Bitcoin?
+Check ZETA balances for address 0x742d35Cc6634C0532925a3b8D5C20aE6f0f3FFaa
+What are the current cross-chain fees from Ethereum to Polygon?
+Query the status of cross-chain transaction 0xabc123...
+Withdraw 100 ZETA from ZetaChain to Ethereum address 0x...
 ```
 
-## API Reference
+### Token & Chain Information  
+```
+List all supported chains on ZetaChain
+Show me all ZRC-20 tokens
+What tokens are available on BSC testnet?
+```
 
-### get_zetachain_balance
+### Development
+```
+Create a new ZetaChain project called "my-dapp" 
+Get testnet ZETA tokens for address 0x...
+What's the current ZetaChain testnet status?
+```
 
-Get the ZetaChain token balance for a specific address.
+## Supported Chains
 
-**Parameters:**
-- `address` (string, required): The wallet address to check
+ZetaChain MCP server supports all ZetaChain connected chains:
 
-### get_zetachain_network_info
+- **Ethereum** (Sepolia Testnet)
+- **BSC** (Testnet) 
+- **Polygon** (Amoy Testnet)
+- **Avalanche** (Fuji Testnet)
+- **Arbitrum** (Sepolia)
+- **Base** (Sepolia)
+- **Bitcoin** (Testnet/Signet)
+- **Solana** (Devnet)
+- **TON** (Testnet)
+- **Sui** (Testnet)
+- **Kaia** (Testnet)
 
-Get current ZetaChain network information including chain ID, block height, and status.
+## Requirements
 
-**Parameters:** None
+- Node.js 18+
+- ZetaChain CLI (installed automatically as dependency)
 
-### estimate_cross_chain_fee
+## Architecture
 
-Estimate fees for cross-chain transactions between supported networks.
+This MCP server provides a bridge between AI assistants and the ZetaChain CLI, enabling:
 
-**Parameters:**
-- `fromChain` (string, required): Source chain identifier
-- `toChain` (string, required): Destination chain identifier  
-- `amount` (string, required): Amount to transfer
+- **Direct CLI Integration**: All commands are executed through the official ZetaChain CLI
+- **Real-time Data**: Live blockchain data from ZetaChain networks  
+- **Cross-chain Functionality**: Full access to ZetaChain's omnichain capabilities
+- **Developer Tools**: Project creation, account management, and testing utilities
 
 ## License
 
