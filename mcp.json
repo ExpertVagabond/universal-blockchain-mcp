@@ -1,0 +1,54 @@
+{
+  "name": "zetachain-mcp-server",
+  "version": "1.0.0",
+  "description": "Comprehensive ZetaChain MCP server with full CLI integration for cross-chain blockchain development",
+  "author": "ZetaChain Community",
+  "license": "MIT",
+  "repository": "https://github.com/ExpertVagabond/zetachain-mcp-server",
+  "keywords": [
+    "zetachain",
+    "blockchain",
+    "cross-chain",
+    "omnichain", 
+    "defi",
+    "mcp",
+    "ai-tools"
+  ],
+  "capabilities": {
+    "tools": {
+      "count": 15,
+      "categories": [
+        "account-management",
+        "balance-queries",
+        "cross-chain-operations", 
+        "token-management",
+        "network-information",
+        "development-tools"
+      ]
+    }
+  },
+  "requirements": {
+    "node": ">=18.0.0",
+    "dependencies": {
+      "zetachain": "^6.4.0"
+    }
+  },
+  "transport": {
+    "type": "stdio",
+    "supported": ["stdio", "http"]
+  },
+  "documentation": {
+    "readme": "README.md",
+    "examples": [
+      "Create account: 'Create a new ZetaChain account called my-wallet'",
+      "Check balance: 'What's the ZETA balance for address 0x...'",
+      "List chains: 'Show me all supported ZetaChain networks'",
+      "Cross-chain: 'Withdraw 100 ZETA from ZetaChain to Ethereum'"
+    ]
+  },
+  "testing": {
+    "command": "npm test",
+    "timeout": 30000,
+    "coverage": ["tools/list", "network-info", "chain-list", "token-list"]
+  }
+}

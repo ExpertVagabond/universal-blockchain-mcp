@@ -1,0 +1,20 @@
+{
+  "name": "zetachain-mcp-server",
+  "description": "Comprehensive ZetaChain MCP server with full CLI integration",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "build": {
+    "command": "npm run build",
+    "output": "./dist"
+  },
+  "test": {
+    "command": "npm test",
+    "timeout": 30000
+  },
+  "dependencies": {
+    "runtime": ["zetachain"]
+  },
+  "environment": {
+    "NODE_ENV": "production"
+  }
+}

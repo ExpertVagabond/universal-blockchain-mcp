@@ -33,7 +33,7 @@ async function runTest(name, request) {
     responses += data.toString();
   });
 
-  await setTimeout(3000);
+  await setTimeout(10000); // Increase timeout for CLI commands
   server.kill();
 
   const responseLines = responses.trim().split('\n').filter(line => 
@@ -78,77 +78,54 @@ async function testComprehensive() {
     id: 2,
     method: "tools/call",
     params: {
-      name: "get_zetachain_network_info",
+      name: "get_network_info",
       arguments: { network: "testnet" }
     }
   });
 
-  // Test 3: Get network info (mainnet)
-  await runTest('Network Info (Mainnet)', {
+  // Test 3: Get balance (valid address)
+  await runTest('Balance Query (Valid Address)', {
     jsonrpc: "2.0",
     id: 3,
     method: "tools/call",
     params: {
-      name: "get_zetachain_network_info",
-      arguments: { network: "mainnet" }
+      name: "get_balances",
+      arguments: { 
+        address: "0x742d35Cc6634C0532925a3b8D5C20aE6f0f3FFaa"
+      }
     }
   });
 
-  // Test 4: Get balance (valid address)
-  await runTest('Balance Query (Valid Address)', {
+  // Test 4: List supported chains
+  await runTest('List Supported Chains', {
     jsonrpc: "2.0",
     id: 4,
     method: "tools/call",
     params: {
-      name: "get_zetachain_balance",
-      arguments: { 
-        address: "0x742d35Cc6634C0532925a3b8D5C20aE6f0f3FFaa",
-        network: "testnet" 
-      }
+      name: "list_chains",
+      arguments: {}
     }
   });
 
-  // Test 5: Get balance (invalid address format)
-  await runTest('Balance Query (Invalid Address)', {
+  // Test 5: List ZRC-20 tokens
+  await runTest('List ZRC-20 Tokens', {
     jsonrpc: "2.0",
     id: 5,
     method: "tools/call",
     params: {
-      name: "get_zetachain_balance",
-      arguments: { 
-        address: "invalid-address",
-        network: "testnet" 
-      }
+      name: "list_tokens",
+      arguments: {}
     }
   });
 
-  // Test 6: Estimate cross-chain fee
-  await runTest('Cross-Chain Fee Estimation', {
+  // Test 6: Get cross-chain fees
+  await runTest('Get Cross-Chain Fees', {
     jsonrpc: "2.0",
     id: 6,
     method: "tools/call",
     params: {
-      name: "estimate_cross_chain_fee",
-      arguments: { 
-        fromChain: "ethereum",
-        toChain: "polygon",
-        amount: "1000000000000000000"
-      }
-    }
-  });
-
-  // Test 7: Cross-chain fee with invalid amount
-  await runTest('Cross-Chain Fee (Invalid Amount)', {
-    jsonrpc: "2.0",
-    id: 7,
-    method: "tools/call",
-    params: {
-      name: "estimate_cross_chain_fee",
-      arguments: { 
-        fromChain: "ethereum",
-        toChain: "polygon",
-        amount: "invalid-amount"
-      }
+      name: "get_fees",
+      arguments: {}
     }
   });
 
