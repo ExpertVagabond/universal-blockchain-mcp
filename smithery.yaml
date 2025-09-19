@@ -1,13 +1,22 @@
-runtime: typescript
-remote: true
-buildCommand: npm run build
-startCommand: node dist/index.js
+# Smithery MCP Server Configuration
+# Clean configuration without deprecated fields
 
-# User configuration options
-config:
+# Server metadata
+name: zetachain-mcp-server
+description: Universal blockchain MCP server for ZetaChain development tools
+version: 1.0.0
+author: ZetaChain Community
+license: MIT
+
+# Runtime configuration
+runtime: typescript
+transport: stdio
+
+# User configuration schema
+configSchema:
   network:
-    type: enum
-    values: [testnet, mainnet]
+    type: string
+    enum: [testnet, mainnet]
     default: testnet
     description: ZetaChain network to connect to
   
@@ -30,3 +39,11 @@ config:
     type: boolean
     default: false
     description: Enable debug logging
+
+# Keywords for discovery
+keywords:
+  - zetachain
+  - blockchain
+  - mcp
+  - universal
+  - cross-chain

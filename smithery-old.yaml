@@ -1,0 +1,32 @@
+runtime: typescript
+remote: true
+buildCommand: npm run build
+startCommand: node dist/index.js
+
+# User configuration options
+config:
+  network:
+    type: enum
+    values: [testnet, mainnet]
+    default: testnet
+    description: ZetaChain network to connect to
+  
+  privateKey:
+    type: string
+    required: false
+    description: Private key for transactions (optional)
+  
+  rpcUrl:
+    type: string
+    required: false
+    description: Custom RPC URL (optional)
+  
+  enableAnalytics:
+    type: boolean
+    default: false
+    description: Enable analytics collection
+  
+  debug:
+    type: boolean
+    default: false
+    description: Enable debug logging

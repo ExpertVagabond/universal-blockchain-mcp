@@ -1,0 +1,216 @@
+{
+  "version": "1.0.0",
+  "generated": "2025-09-19T15:00:00Z",
+  "source": "zetachain-cli",
+  "commands": [
+    {
+      "name": "create_contract",
+      "description": "Create a new ZetaChain smart contract project",
+      "category": "development",
+      "cliCommand": "zetachain create",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "description": "Contract project name",
+          "required": true
+        },
+        "template": {
+          "type": "string", 
+          "description": "Template to use (counter, erc20, nft)",
+          "required": false,
+          "enum": ["counter", "erc20", "nft", "messaging"]
+        }
+      },
+      "examples": [
+        "zetachain create my-token --template erc20",
+        "zetachain create my-nft --template nft"
+      ]
+    },
+    {
+      "name": "deploy_contract",
+      "description": "Deploy smart contracts to ZetaChain networks",
+      "category": "deployment", 
+      "cliCommand": "zetachain deploy",
+      "parameters": {
+        "contractPath": {
+          "type": "string",
+          "description": "Path to contract file",
+          "required": true
+        },
+        "network": {
+          "type": "string",
+          "description": "Target network (testnet, mainnet)",
+          "required": false,
+          "enum": ["testnet", "mainnet"]
+        },
+        "args": {
+          "type": "array",
+          "description": "Constructor arguments",
+          "required": false
+        }
+      },
+      "examples": [
+        "zetachain deploy ./contracts/MyToken.sol --network testnet"
+      ]
+    },
+    {
+      "name": "deposit_and_call",
+      "description": "Make deposit and call to contract with cross-chain functionality", 
+      "category": "cross-chain",
+      "cliCommand": "zetachain evm deposit-and-call",
+      "parameters": {
+        "to": {
+          "type": "string",
+          "description": "Recipient contract address", 
+          "required": true
+        },
+        "amount": {
+          "type": "string",
+          "description": "Amount to deposit (in ETH)",
+          "required": true
+        },
+        "chainId": {
+          "type": "string", 
+          "description": "Source chain ID (Base Sepolia: 84532)",
+          "required": true
+        },
+        "data": {
+          "type": "string",
+          "description": "Call data for contract interaction",
+          "required": false
+        }
+      },
+      "examples": [
+        "zetachain evm deposit-and-call --to 0x1234... --amount 0.01 --chain 84532"
+      ]
+    },
+    {
+      "name": "query_balance",
+      "description": "Query account balances across networks",
+      "category": "query",
+      "cliCommand": "zetachain query balance",
+      "parameters": {
+        "address": {
+          "type": "string", 
+          "description": "Account address to query",
+          "required": true
+        },
+        "network": {
+          "type": "string",
+          "description": "Network to query (optional)",
+          "required": false
+        }
+      },
+      "examples": [
+        "zetachain query balance 0x1234... --network testnet"
+      ]
+    },
+    {
+      "name": "manage_accounts",
+      "description": "Create and manage ZetaChain accounts",
+      "category": "accounts",
+      "cliCommand": "zetachain accounts",
+      "parameters": {
+        "action": {
+          "type": "string",
+          "description": "Account action (list, create, import)",
+          "required": true,
+          "enum": ["list", "create", "import", "delete"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Account name",
+          "required": false
+        },
+        "privateKey": {
+          "type": "string", 
+          "description": "Private key for import",
+          "required": false,
+          "sensitive": true
+        }
+      },
+      "examples": [
+        "zetachain accounts list",
+        "zetachain accounts create my-account"
+      ]
+    },
+    {
+      "name": "send_transaction", 
+      "description": "Send transactions on ZetaChain networks",
+      "category": "transactions",
+      "cliCommand": "zetachain send",
+      "parameters": {
+        "to": {
+          "type": "string",
+          "description": "Recipient address",
+          "required": true
+        },
+        "amount": {
+          "type": "string", 
+          "description": "Amount to send",
+          "required": true
+        },
+        "network": {
+          "type": "string",
+          "description": "Network to use",
+          "required": false
+        }
+      },
+      "examples": [
+        "zetachain send --to 0x1234... --amount 1.0 --network testnet"
+      ]
+    },
+    {
+      "name": "list_networks",
+      "description": "Display available ZetaChain networks",
+      "category": "info", 
+      "cliCommand": "zetachain networks",
+      "parameters": {},
+      "examples": [
+        "zetachain networks"
+      ]
+    },
+    {
+      "name": "generate_wallet",
+      "description": "Create new wallets and key pairs", 
+      "category": "accounts",
+      "cliCommand": "zetachain wallet generate",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "description": "Wallet name",
+          "required": false
+        }
+      },
+      "examples": [
+        "zetachain wallet generate my-wallet"
+      ]
+    }
+  ],
+  "categories": {
+    "development": "Smart contract development tools",
+    "deployment": "Contract deployment and management", 
+    "cross-chain": "Cross-chain operations and messaging",
+    "query": "Blockchain data queries and information",
+    "accounts": "Account and wallet management",
+    "transactions": "Transaction operations",
+    "info": "Network and system information"
+  },
+  "metadata": {
+    "cli_version": "6.4.0",
+    "mcp_version": "1.0.0", 
+    "supported_networks": ["testnet", "mainnet"],
+    "supported_chains": [
+      {
+        "name": "ZetaChain Testnet",
+        "chainId": "7001",
+        "rpc": "https://zetachain-evm.blockpi.network/v1/rpc/public"
+      },
+      {
+        "name": "Base Sepolia", 
+        "chainId": "84532",
+        "rpc": "https://sepolia.base.org"
+      }
+    ]
+  }
+}
