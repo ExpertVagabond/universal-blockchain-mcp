@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "zetachain": {
+      "command": "npx",
+      "args": ["@ExpertVagabond/zetachain-mcp-server"],
+      "env": {
+        "ZETACHAIN_NETWORK": "testnet"
+      }
+    }
+  }
+}
