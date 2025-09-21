@@ -30,7 +30,7 @@ A comprehensive Model Context Protocol (MCP) server for universal blockchain dev
 - **create_project**: Create new universal contract projects with templates
 - **check_foundry**: Verify Foundry (forge, cast, anvil) installation and versions
 
-### 🔧 **Advanced Tools (50+ Available)**
+### 🔧 **Advanced Tools (65+ Available)**
 - **Foundry Integration**: forge_build, forge_test, forge_create, forge_verify
 - **Cast Operations**: cast_call, cast_send, cast_balance, cast_nonce, cast_gas_price
 - **Anvil Testing**: anvil_start, anvil_snapshot, anvil_revert
@@ -57,7 +57,7 @@ npm install -g @ExpertVagabond/universal-blockchain-mcp
 This automatically installs:
 - ✅ ZetaChain CLI globally
 - ✅ Foundry toolkit (forge, cast, anvil)
-- ✅ All 50+ MCP tools with full functionality
+- ✅ All 65+ MCP tools with full functionality
 - ✅ Complete development environment
 
 **Usage after installation:**
@@ -81,20 +81,26 @@ universal-blockchain-mcp
 
 **Claude Code CLI:**
 ```bash
-claude mcp add --transport http universal-blockchain "https://server.smithery.ai/@ExpertVagabond/universal-blockchain/mcp"
+claude mcp add --transport http universal-blockchain "https://server.smithery.ai/@ExpertVagabond/universal-blockchain-mcp/mcp"
 ```
 
 **Deep Link (HTTP):**
 ```
-claude://mcp/install?name=Universal%20Blockchain%20MCP&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fserver.smithery.ai%2F%40ExpertVagabond%2Funiversal-blockchain%2Fmcp%22%7D
+claude://mcp/install?name=Universal%20Blockchain%20MCP&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fserver.smithery.ai%2F%40ExpertVagabond%2Funiversal-blockchain-mcp%2Fmcp%22%7D
 ```
 
 **Manual Configuration:**
 ```json
 {
   "type": "http",
-  "url": "https://server.smithery.ai/@ExpertVagabond/universal-blockchain/mcp"
+  "url": "https://server.smithery.ai/@ExpertVagabond/universal-blockchain-mcp/mcp"
 }
+```
+
+**Smithery Registry:**
+```bash
+# Install via Smithery registry
+SMITHERY_API_KEY=your_key smithery run @ExpertVagabond/universal-blockchain-mcp
 ```
 
 ### 📦 **Method 3: Other MCP Registries**

@@ -1612,6 +1612,648 @@ Address: ${address}
     });
   }
 
+  // === FOUNDRY FORGE IMPLEMENTATIONS ===
+  private async forgeBuild(path?: string) {
+    try {
+      const args = ['forge', 'build'];
+      if (path) args.push('--root', path);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔨 **Forge Build Complete**\n\n${output}\n\n✅ **Smart contracts compiled successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Forge build failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async forgeTest(path?: string, pattern?: string) {
+    try {
+      const args = ['forge', 'test'];
+      if (path) args.push('--root', path);
+      if (pattern) args.push('--match-test', pattern);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🧪 **Forge Test Results**\n\n${output}\n\n✅ **All tests completed!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Forge test failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async forgeCreate(contract: string, rpcUrl: string, privateKey: string, constructorArgs?: string) {
+    try {
+      const args = ['forge', 'create', contract, '--rpc-url', rpcUrl, '--private-key', privateKey];
+      if (constructorArgs) args.push('--constructor-args', constructorArgs);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🚀 **Contract Deployed**\n\n${output}\n\n✅ **Contract successfully deployed to the blockchain!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Contract deployment failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async forgeVerify(contractAddress: string, contractName: string, apiKey: string, chain: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'forge', 'verify-contract', contractAddress, contractName, '--etherscan-api-key', apiKey, '--chain', chain
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔍 **Contract Verification**\n\n${output}\n\n✅ **Contract verified on ${chain} explorer!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Contract verification failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === FOUNDRY CAST IMPLEMENTATIONS ===
+  private async castCall(contractAddress: string, functionSignature: string, args?: string, rpcUrl?: string) {
+    try {
+      const castArgs = ['cast', 'call', contractAddress, functionSignature];
+      if (args) castArgs.push(args);
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📞 **Contract Call Result**\n\n${output}\n\n✅ **Function call executed successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Contract call failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async castSend(contractAddress: string, functionSignature: string, args?: string, rpcUrl?: string, privateKey?: string, value?: string) {
+    try {
+      const castArgs = ['cast', 'send', contractAddress, functionSignature];
+      if (args) castArgs.push(args);
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      if (privateKey) castArgs.push('--private-key', privateKey);
+      if (value) castArgs.push('--value', value);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📤 **Transaction Sent**\n\n${output}\n\n✅ **Transaction submitted to the blockchain!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Transaction failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async castBalance(address: string, rpcUrl?: string) {
+    try {
+      const castArgs = ['cast', 'balance', address];
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `💰 **ETH Balance**\n\nAddress: ${address}\nBalance: ${output}\n\n✅ **Balance retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Balance check failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async castNonce(address: string, rpcUrl?: string) {
+    try {
+      const castArgs = ['cast', 'nonce', address];
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔢 **Transaction Nonce**\n\nAddress: ${address}\nNonce: ${output}\n\n✅ **Nonce retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Nonce check failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async castGasPrice(rpcUrl?: string) {
+    try {
+      const castArgs = ['cast', 'gas-price'];
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `⛽ **Current Gas Price**\n\n${output} wei\n\n✅ **Gas price retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Gas price check failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async castBlock(block: string, rpcUrl?: string) {
+    try {
+      const castArgs = ['cast', 'block', block];
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🧱 **Block Information**\n\nBlock: ${block}\n\n${output}\n\n✅ **Block data retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Block query failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async castTx(txHash: string, rpcUrl?: string) {
+    try {
+      const castArgs = ['cast', 'tx', txHash];
+      if (rpcUrl) castArgs.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(castArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📋 **Transaction Details**\n\nHash: ${txHash}\n\n${output}\n\n✅ **Transaction data retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Transaction query failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === FOUNDRY ANVIL IMPLEMENTATIONS ===
+  private async anvilStart(port?: number, accounts?: number, balance?: number, forkUrl?: string) {
+    try {
+      const args = ['anvil'];
+      if (port) args.push('--port', port.toString());
+      if (accounts) args.push('--accounts', accounts.toString());
+      if (balance) args.push('--balance', balance.toString());
+      if (forkUrl) args.push('--fork-url', forkUrl);
+      
+      // Note: This will start anvil in the background
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🏗️ **Anvil Local Node Started**\n\n${output}\n\n✅ **Local Ethereum node is running!**\n\n🔗 **RPC URL**: http://localhost:${port || 8545}`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Anvil start failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async anvilSnapshot(rpcUrl?: string) {
+    try {
+      const args = ['cast', 'rpc', 'evm_snapshot'];
+      if (rpcUrl) args.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📸 **Snapshot Created**\n\nSnapshot ID: ${output}\n\n✅ **Blockchain state saved!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Snapshot creation failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async anvilRevert(snapshotId: string, rpcUrl?: string) {
+    try {
+      const args = ['cast', 'rpc', 'evm_revert', snapshotId];
+      if (rpcUrl) args.push('--rpc-url', rpcUrl);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `⏪ **Reverted to Snapshot**\n\nSnapshot ID: ${snapshotId}\nResult: ${output}\n\n✅ **Blockchain state restored!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Snapshot revert failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === ZETACHAIN ADVANCED IMPLEMENTATIONS ===
+  private async zetaValidatorCreate(moniker: string, amount: string, commissionRate?: string, minSelfDelegation?: string) {
+    try {
+      const args = ['tx', 'staking', 'create-validator', '--moniker', moniker, '--amount', amount];
+      if (commissionRate) args.push('--commission-rate', commissionRate);
+      if (minSelfDelegation) args.push('--min-self-delegation', minSelfDelegation);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🏛️ **Validator Created**\n\nMoniker: ${moniker}\nAmount: ${amount}\n\n${output}\n\n✅ **Validator successfully created on ZetaChain!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Validator creation failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async zetaGovernanceVote(proposalId: string, vote: string, fromAccount: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'tx', 'gov', 'vote', proposalId, vote, '--from', fromAccount
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🗳️ **Governance Vote Cast**\n\nProposal: ${proposalId}\nVote: ${vote}\nFrom: ${fromAccount}\n\n${output}\n\n✅ **Vote successfully submitted!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Governance vote failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async zetaGovernanceProposals(status?: string) {
+    try {
+      const args = ['query', 'gov', 'proposals'];
+      if (status) args.push('--status', status);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📋 **Governance Proposals**\n\n${output}\n\n✅ **Proposals retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Proposals query failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async zetaStakingDelegate(validatorAddress: string, amount: string, fromAccount: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'tx', 'staking', 'delegate', validatorAddress, amount, '--from', fromAccount
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🎯 **Delegation Successful**\n\nValidator: ${validatorAddress}\nAmount: ${amount}\nFrom: ${fromAccount}\n\n${output}\n\n✅ **ZETA tokens successfully delegated!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Delegation failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async zetaStakingRewards(delegatorAddress: string, validatorAddress?: string) {
+    try {
+      const args = ['query', 'distribution', 'rewards', delegatorAddress];
+      if (validatorAddress) args.push(validatorAddress);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `💰 **Staking Rewards**\n\nDelegator: ${delegatorAddress}\n${validatorAddress ? `Validator: ${validatorAddress}\n` : ''}\n${output}\n\n✅ **Rewards information retrieved!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Rewards query failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === CROSS-CHAIN IMPLEMENTATIONS ===
+  private async crossChainSend(fromChain: string, toChain: string, token: string, amount: string, recipient: string, fromAccount: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'tx', 'crosschain', 'send', '--from-chain', fromChain, '--to-chain', toChain, '--token', token, '--amount', amount, '--recipient', recipient, '--from', fromAccount
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🌉 **Cross-Chain Transfer**\n\nFrom: ${fromChain}\nTo: ${toChain}\nToken: ${token}\nAmount: ${amount}\nRecipient: ${recipient}\n\n${output}\n\n✅ **Cross-chain transaction initiated!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Cross-chain transfer failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async crossChainStatus(txHash: string, cctxIndex?: string) {
+    try {
+      const args = ['query', 'crosschain', 'status', '--tx-hash', txHash];
+      if (cctxIndex) args.push('--cctx-index', cctxIndex);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔍 **Cross-Chain Status**\n\nTransaction: ${txHash}\n${cctxIndex ? `CCTX Index: ${cctxIndex}\n` : ''}\n${output}\n\n✅ **Status retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Cross-chain status query failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === SMART CONTRACT IMPLEMENTATIONS ===
+  private async contractCompile(contractPath: string, optimize?: boolean, outputDir?: string) {
+    try {
+      const args = ['contract', 'compile', '--path', contractPath];
+      if (optimize !== false) args.push('--optimize');
+      if (outputDir) args.push('--output-dir', outputDir);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📦 **Contract Compiled**\n\nPath: ${contractPath}\nOptimized: ${optimize !== false}\n\n${output}\n\n✅ **Smart contract compiled successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Contract compilation failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async contractDeploy(contractName: string, chain: string, constructorArgs?: any[], fromAccount?: string) {
+    try {
+      const args = ['contract', 'deploy', '--contract', contractName, '--chain', chain];
+      if (constructorArgs && constructorArgs.length > 0) {
+        args.push('--constructor-args', constructorArgs.join(','));
+      }
+      if (fromAccount) args.push('--from', fromAccount);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🚀 **Contract Deployed**\n\nContract: ${contractName}\nChain: ${chain}\nFrom: ${fromAccount || 'Default'}\n\n${output}\n\n✅ **Contract deployed successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Contract deployment failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async contractInteract(contractAddress: string, functionName: string, args?: any[], chain?: string, fromAccount?: string) {
+    try {
+      const cmdArgs = ['contract', 'call', '--address', contractAddress, '--function', functionName];
+      if (args && args.length > 0) {
+        cmdArgs.push('--args', args.join(','));
+      }
+      if (chain) cmdArgs.push('--chain', chain);
+      if (fromAccount) cmdArgs.push('--from', fromAccount);
+      const output = await this.executeZetaCommand(cmdArgs);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📞 **Contract Interaction**\n\nAddress: ${contractAddress}\nFunction: ${functionName}\nChain: ${chain || 'Default'}\n\n${output}\n\n✅ **Contract function called successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Contract interaction failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === DEFI IMPLEMENTATIONS ===
+  private async defiSwap(fromToken: string, toToken: string, amount: string, chain: string, dex?: string, slippage?: number) {
+    try {
+      const args = ['defi', 'swap', '--from-token', fromToken, '--to-token', toToken, '--amount', amount, '--chain', chain];
+      if (dex) args.push('--dex', dex);
+      if (slippage) args.push('--slippage', slippage.toString());
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔄 **Token Swap**\n\nFrom: ${fromToken}\nTo: ${toToken}\nAmount: ${amount}\nChain: ${chain}\nDEX: ${dex || 'Auto'}\n\n${output}\n\n✅ **Swap executed successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Token swap failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async defiLiquidityAdd(tokenA: string, tokenB: string, amountA: string, amountB: string, chain: string, dex?: string) {
+    try {
+      const args = ['defi', 'add-liquidity', '--token-a', tokenA, '--token-b', tokenB, '--amount-a', amountA, '--amount-b', amountB, '--chain', chain];
+      if (dex) args.push('--dex', dex);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `💧 **Liquidity Added**\n\nToken A: ${tokenA} (${amountA})\nToken B: ${tokenB} (${amountB})\nChain: ${chain}\nDEX: ${dex || 'Auto'}\n\n${output}\n\n✅ **Liquidity successfully added to pool!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Liquidity addition failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async defiYieldFarm(protocol: string, pool: string, amount: string, chain: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'defi', 'yield-farm', '--protocol', protocol, '--pool', pool, '--amount', amount, '--chain', chain
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🌾 **Yield Farming**\n\nProtocol: ${protocol}\nPool: ${pool}\nAmount: ${amount}\nChain: ${chain}\n\n${output}\n\n✅ **Tokens staked for yield farming!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Yield farming failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === NFT IMPLEMENTATIONS ===
+  private async nftMint(collection: string, recipient: string, metadataUri: string, chain: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'nft', 'mint', '--collection', collection, '--recipient', recipient, '--metadata-uri', metadataUri, '--chain', chain
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🎨 **NFT Minted**\n\nCollection: ${collection}\nRecipient: ${recipient}\nMetadata: ${metadataUri}\nChain: ${chain}\n\n${output}\n\n✅ **NFT successfully minted!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`NFT minting failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async nftTransfer(collection: string, tokenId: string, fromAddress: string, toAddress: string, chain: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'nft', 'transfer', '--collection', collection, '--token-id', tokenId, '--from', fromAddress, '--to', toAddress, '--chain', chain
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔄 **NFT Transfer**\n\nCollection: ${collection}\nToken ID: ${tokenId}\nFrom: ${fromAddress}\nTo: ${toAddress}\nChain: ${chain}\n\n${output}\n\n✅ **NFT successfully transferred!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`NFT transfer failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async nftMetadata(collection: string, tokenId: string, chain: string) {
+    try {
+      const output = await this.executeZetaCommand([
+        'nft', 'metadata', '--collection', collection, '--token-id', tokenId, '--chain', chain
+      ]);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📋 **NFT Metadata**\n\nCollection: ${collection}\nToken ID: ${tokenId}\nChain: ${chain}\n\n${output}\n\n✅ **Metadata retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`NFT metadata query failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  // === ADVANCED BLOCKCHAIN IMPLEMENTATIONS ===
+  private async blockExplorer(query: string, chain: string, type?: string) {
+    try {
+      const args = ['explorer', 'search', '--query', query, '--chain', chain];
+      if (type) args.push('--type', type);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔍 **Block Explorer Search**\n\nQuery: ${query}\nChain: ${chain}\nType: ${type || 'Auto'}\n\n${output}\n\n✅ **Search completed successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Block explorer search failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async gasTracker(chains?: string[], period?: string) {
+    try {
+      const args = ['gas', 'tracker'];
+      if (chains && chains.length > 0) args.push('--chains', chains.join(','));
+      if (period) args.push('--period', period);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `⛽ **Gas Price Tracker**\n\nChains: ${chains ? chains.join(', ') : 'All'}\nPeriod: ${period || '24h'}\n\n${output}\n\n✅ **Gas prices retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Gas tracking failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async portfolioTracker(addresses: string[], chains?: string[]) {
+    try {
+      const args = ['portfolio', 'track', '--addresses', addresses.join(',')];
+      if (chains && chains.length > 0) args.push('--chains', chains.join(','));
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `📊 **Portfolio Tracker**\n\nAddresses: ${addresses.length}\nChains: ${chains ? chains.join(', ') : 'All'}\n\n${output}\n\n✅ **Portfolio data retrieved successfully!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Portfolio tracking failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async securityAudit(contractAddress: string, chain: string, analysisType?: string) {
+    try {
+      const args = ['security', 'audit', '--contract', contractAddress, '--chain', chain];
+      if (analysisType) args.push('--type', analysisType);
+      const output = await this.executeZetaCommand(args);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `🔒 **Security Audit**\n\nContract: ${contractAddress}\nChain: ${chain}\nType: ${analysisType || 'Basic'}\n\n${output}\n\n✅ **Security audit completed!**`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Security audit failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
   // Additional useful command implementations
   private async walletExport(accountName: string, format: string) {
     try {
@@ -1695,6 +2337,15 @@ Address: ${address}
   }
 
   private async bridgeStatus(txHash: string, bridgeType?: string) {
+    if (this.testMode) {
+      return {
+        content: [{
+          type: "text",
+          text: `🌉 **Bridge Status (Demo Mode)**\n\nTransaction: ${txHash}\nBridge Type: ${bridgeType || 'Auto-detected'}\nStatus: ✅ Completed\nSource Chain: BSC Testnet\nDestination Chain: Ethereum Sepolia\nProgress: Confirmed → Pending → Mined → Completed\nTime: 2 minutes\n\n${this.getInstallationMessage()}`
+        }]
+      };
+    }
+
     try {
       const args = ['bridge', 'status', '--tx', txHash];
       if (bridgeType) {
@@ -1712,728 +2363,6 @@ Address: ${address}
     } catch (error) {
       throw new Error(`Failed to check bridge status: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
-
-  // === FOUNDRY FORGE IMPLEMENTATIONS ===
-  private async forgeBuild(path?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔨 **Forge Build (Demo Mode)**\n\nProject: ${path || 'current directory'}\nStatus: ✅ Compiled successfully\nContracts: 3 contracts compiled\nOutput: out/Contract.sol/Contract.json\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['build'];
-      if (path) args.push('--root', path);
-      
-      const result = await this.executeCommand('forge', args);
-      return {
-        content: [{
-          type: "text",
-          text: `🔨 **Forge Build Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Forge build failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async forgeTest(path?: string, pattern?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🧪 **Forge Test (Demo Mode)**\n\nRunning tests...\nPattern: ${pattern || 'all tests'}\nPath: ${path || 'current directory'}\n\n✅ All tests passed\nPassed: 5, Failed: 0\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['test'];
-      if (path) args.push('--root', path);
-      if (pattern) args.push('--match-test', pattern);
-      
-      const result = await this.executeCommand('forge', args);
-      return {
-        content: [{
-          type: "text",
-          text: `🧪 **Forge Test Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Forge test failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async forgeCreate(contract: string, rpcUrl: string, privateKey: string, constructorArgs?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🚀 **Forge Deploy (Demo Mode)**\n\nContract: ${contract}\nNetwork: ${rpcUrl}\nStatus: ✅ Deployed successfully\nAddress: 0x742d35Cc6634C0532925a3b8D2fF1997Cda4a0a2\nTransaction: 0xabc123...\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['create', contract, '--rpc-url', rpcUrl, '--private-key', privateKey];
-      if (constructorArgs) args.push('--constructor-args', constructorArgs);
-      
-      const result = await this.executeCommand('forge', args);
-      return {
-        content: [{
-          type: "text",
-          text: `🚀 **Forge Deploy Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Forge deploy failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async forgeVerify(contractAddress: string, contractName: string, apiKey: string, chain: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `✅ **Forge Verify (Demo Mode)**\n\nContract: ${contractAddress}\nName: ${contractName}\nChain: ${chain}\nStatus: ✅ Verified successfully\nExplorer: https://etherscan.io/address/${contractAddress}#code\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['verify-contract', contractAddress, contractName, '--chain', chain, '--etherscan-api-key', apiKey];
-      
-      const result = await this.executeCommand('forge', args);
-      return {
-        content: [{
-          type: "text",
-          text: `✅ **Forge Verify Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Forge verify failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  // === FOUNDRY CAST IMPLEMENTATIONS ===
-  private async castCall(contractAddress: string, functionSignature: string, args?: string, rpcUrl?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `📞 **Cast Call (Demo Mode)**\n\nContract: ${contractAddress}\nFunction: ${functionSignature}\nArgs: ${args || 'none'}\nResult: 0x0000000000000000000000000000000000000000000000000000000000000001\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const command = ['call', contractAddress, functionSignature];
-      if (args) command.push(args);
-      if (rpcUrl) command.push('--rpc-url', rpcUrl);
-      
-      const result = await this.executeCommand('cast', command);
-      return {
-        content: [{
-          type: "text",
-          text: `📞 **Cast Call Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast call failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async castSend(contractAddress: string, functionSignature: string, args?: string, rpcUrl?: string, privateKey?: string, value?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `📤 **Cast Send (Demo Mode)**\n\nContract: ${contractAddress}\nFunction: ${functionSignature}\nArgs: ${args || 'none'}\nValue: ${value || '0'}\nTransaction: 0xdef456...\nStatus: ✅ Confirmed\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const command = ['send', contractAddress, functionSignature];
-      if (args) command.push(args);
-      if (rpcUrl) command.push('--rpc-url', rpcUrl);
-      if (privateKey) command.push('--private-key', privateKey);
-      if (value) command.push('--value', value);
-      
-      const result = await this.executeCommand('cast', command);
-      return {
-        content: [{
-          type: "text",
-          text: `📤 **Cast Send Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast send failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async castBalance(address: string, rpcUrl: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `💰 **Cast Balance (Demo Mode)**\n\nAddress: ${address}\nBalance: 10.5 ETH\nNetwork: ${rpcUrl}\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['balance', address, '--rpc-url', rpcUrl]);
-      return {
-        content: [{
-          type: "text",
-          text: `💰 **Cast Balance Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast balance failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async castNonce(address: string, rpcUrl: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔢 **Cast Nonce (Demo Mode)**\n\nAddress: ${address}\nNonce: 42\nNetwork: ${rpcUrl}\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['nonce', address, '--rpc-url', rpcUrl]);
-      return {
-        content: [{
-          type: "text",
-          text: `🔢 **Cast Nonce Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast nonce failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async castGasPrice(rpcUrl: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `⛽ **Cast Gas Price (Demo Mode)**\n\nNetwork: ${rpcUrl}\nGas Price: 20 gwei\nFast: 25 gwei\nSlow: 15 gwei\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['gas-price', '--rpc-url', rpcUrl]);
-      return {
-        content: [{
-          type: "text",
-          text: `⛽ **Cast Gas Price Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast gas price failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async castBlock(block: string, rpcUrl: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🧱 **Cast Block (Demo Mode)**\n\nBlock: ${block}\nNetwork: ${rpcUrl}\nTimestamp: ${new Date().toISOString()}\nTransactions: 15\nGas Used: 2,500,000\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['block', block, '--rpc-url', rpcUrl]);
-      return {
-        content: [{
-          type: "text",
-          text: `🧱 **Cast Block Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast block failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async castTx(txHash: string, rpcUrl: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `📄 **Cast Transaction (Demo Mode)**\n\nTransaction: ${txHash}\nNetwork: ${rpcUrl}\nStatus: ✅ Success\nGas Used: 21,000\nValue: 1.0 ETH\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['tx', txHash, '--rpc-url', rpcUrl]);
-      return {
-        content: [{
-          type: "text",
-          text: `📄 **Cast Transaction Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cast tx failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  // === FOUNDRY ANVIL IMPLEMENTATIONS ===
-  private async anvilStart(port?: number, accounts?: number, balance?: number, forkUrl?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔨 **Anvil Start (Demo Mode)**\n\nPort: ${port || 8545}\nAccounts: ${accounts || 10}\nBalance: ${balance || 10000} ETH each\nFork: ${forkUrl || 'None'}\nStatus: ✅ Local node started\nRPC: http://localhost:${port || 8545}\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['--port', String(port || 8545), '--accounts', String(accounts || 10), '--balance', String(balance || 10000)];
-      if (forkUrl) args.push('--fork-url', forkUrl);
-      
-      const result = await this.executeCommand('anvil', args);
-      return {
-        content: [{
-          type: "text",
-          text: `🔨 **Anvil Start Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Anvil start failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async anvilSnapshot(rpcUrl?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `📸 **Anvil Snapshot (Demo Mode)**\n\nRPC: ${rpcUrl || 'http://localhost:8545'}\nSnapshot ID: 0x1\nStatus: ✅ Snapshot created\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['rpc', 'evm_snapshot', '--rpc-url', rpcUrl || 'http://localhost:8545']);
-      return {
-        content: [{
-          type: "text",
-          text: `📸 **Anvil Snapshot Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Anvil snapshot failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async anvilRevert(snapshotId: string, rpcUrl?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `⏪ **Anvil Revert (Demo Mode)**\n\nSnapshot ID: ${snapshotId}\nRPC: ${rpcUrl || 'http://localhost:8545'}\nStatus: ✅ Reverted to snapshot\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const result = await this.executeCommand('cast', ['rpc', 'evm_revert', snapshotId, '--rpc-url', rpcUrl || 'http://localhost:8545']);
-      return {
-        content: [{
-          type: "text",
-          text: `⏪ **Anvil Revert Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Anvil revert failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  // === ZETACHAIN ADVANCED IMPLEMENTATIONS ===
-  private async zetaValidatorCreate(moniker: string, amount: string, commissionRate?: string, minSelfDelegation?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `⚡ **ZetaChain Validator Create (Demo Mode)**\n\nMoniker: ${moniker}\nStake: ${amount} ZETA\nCommission: ${commissionRate || '10%'}\nStatus: ✅ Validator created\nAddress: zetavaloper1abc123...\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['tx', 'staking', 'create-validator', '--moniker', moniker, '--amount', amount];
-      if (commissionRate) args.push('--commission-rate', commissionRate);
-      if (minSelfDelegation) args.push('--min-self-delegation', minSelfDelegation);
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `⚡ **ZetaChain Validator Create Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Validator creation failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async zetaGovernanceVote(proposalId: string, vote: string, fromAccount: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🗳️ **ZetaChain Governance Vote (Demo Mode)**\n\nProposal: ${proposalId}\nVote: ${vote}\nAccount: ${fromAccount}\nStatus: ✅ Vote submitted\nTransaction: 0xghi789...\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['tx', 'gov', 'vote', proposalId, vote, '--from', fromAccount];
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `🗳️ **ZetaChain Governance Vote Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Governance vote failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async zetaGovernanceProposals(status?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `📋 **ZetaChain Governance Proposals (Demo Mode)**\n\nActive Proposals:\n1. Proposal #42: Upgrade ZetaChain Protocol (Voting Period)\n2. Proposal #43: Parameter Change (Passed)\n3. Proposal #44: Community Fund Allocation (Voting Period)\n\nFilter: ${status || 'all'}\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['query', 'gov', 'proposals'];
-      if (status) args.push('--status', status);
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `📋 **ZetaChain Governance Proposals Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Governance proposals query failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async zetaStakingDelegate(validatorAddress: string, amount: string, fromAccount: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🥩 **ZetaChain Staking Delegate (Demo Mode)**\n\nValidator: ${validatorAddress}\nAmount: ${amount} ZETA\nFrom: ${fromAccount}\nStatus: ✅ Delegation successful\nRewards: Available for claiming\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['tx', 'staking', 'delegate', validatorAddress, amount, '--from', fromAccount];
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `🥩 **ZetaChain Staking Delegate Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Staking delegation failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async zetaStakingRewards(delegatorAddress: string, validatorAddress?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `💰 **ZetaChain Staking Rewards (Demo Mode)**\n\nDelegator: ${delegatorAddress}\nValidator: ${validatorAddress || 'All validators'}\nPending Rewards: 15.75 ZETA\nTotal Delegated: 1000 ZETA\nAPY: ~12%\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['query', 'distribution', 'rewards', delegatorAddress];
-      if (validatorAddress) args.push(validatorAddress);
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `💰 **ZetaChain Staking Rewards Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Staking rewards query failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  // === CROSS-CHAIN IMPLEMENTATIONS ===
-  private async crossChainSend(fromChain: string, toChain: string, token: string, amount: string, recipient: string, fromAccount: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🌉 **Cross-Chain Send (Demo Mode)**\n\nFrom: ${fromChain}\nTo: ${toChain}\nToken: ${token}\nAmount: ${amount}\nRecipient: ${recipient}\nSender: ${fromAccount}\nStatus: ✅ Cross-chain transaction initiated\nCCTX Hash: 0xjkl012...\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['send', '--from-chain', fromChain, '--to-chain', toChain, '--token', token, '--amount', amount, '--recipient', recipient, '--from', fromAccount];
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `🌉 **Cross-Chain Send Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cross-chain send failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  private async crossChainStatus(txHash?: string, cctxIndex?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔍 **Cross-Chain Status (Demo Mode)**\n\nTransaction: ${txHash || cctxIndex || 'demo'}\nStatus: ✅ Completed\nSource Chain: BSC Testnet\nDestination Chain: Ethereum Sepolia\nProgress: Confirmed → Pending → Mined → Completed\nTime: 2 minutes\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-
-    try {
-      const args = ['query', 'crosschain', 'cctx'];
-      if (txHash) args.push('--hash', txHash);
-      if (cctxIndex) args.push('--index', cctxIndex);
-      
-      const result = await this.executeZetaCommand(args);
-      return {
-        content: [{
-          type: "text",
-          text: `🔍 **Cross-Chain Status Result**\n${result}`
-        }]
-      };
-    } catch (error) {
-      throw new Error(`Cross-chain status query failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  // Add all missing comprehensive implementations with test mode fallbacks
-  private async contractCompile(contractPath: string, optimize?: boolean, outputDir?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔨 **Contract Compile (Demo Mode)**\n\nContract: ${contractPath}\nOptimize: ${optimize ? 'Yes' : 'No'}\nOutput: ${outputDir || 'out/'}\nStatus: ✅ Compiled successfully\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Compiling ${contractPath}...` }] };
-  }
-
-  private async contractDeploy(contractName: string, chain: string, constructorArgs?: any[], fromAccount?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🚀 **Contract Deploy (Demo Mode)**\n\nContract: ${contractName}\nChain: ${chain}\nDeployer: ${fromAccount || 'default'}\nStatus: ✅ Deployed\nAddress: 0x742d35Cc6634C0532925a3b8D2fF1997Cda4a0a2\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Deploying ${contractName} to ${chain}...` }] };
-  }
-
-  private async contractInteract(contractAddress: string, functionName: string, args?: any[], chain?: string, fromAccount?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `📞 **Contract Interact (Demo Mode)**\n\nContract: ${contractAddress}\nFunction: ${functionName}\nChain: ${chain || 'default'}\nStatus: ✅ Success\nResult: 0x1\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Calling ${functionName} on ${contractAddress}...` }] };
-  }
-
-  private async defiSwap(fromToken: string, toToken: string, amount: string, chain: string, dex?: string, slippage?: number) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔄 **DeFi Swap (Demo Mode)**\n\nFrom: ${amount} ${fromToken}\nTo: ${toToken}\nChain: ${chain}\nDEX: ${dex || 'Uniswap'}\nSlippage: ${slippage || 0.5}%\nStatus: ✅ Swap completed\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Swapping ${amount} ${fromToken} to ${toToken} on ${chain}...` }] };
-  }
-
-  private async defiLiquidityAdd(tokenA: string, tokenB: string, amountA: string, amountB: string, chain: string, dex?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `💧 **DeFi Liquidity Add (Demo Mode)**\n\nPair: ${tokenA}/${tokenB}\nAmounts: ${amountA} / ${amountB}\nChain: ${chain}\nDEX: ${dex || 'Uniswap'}\nStatus: ✅ Liquidity added\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Adding liquidity for ${tokenA}/${tokenB} on ${chain}...` }] };
-  }
-
-  private async defiYieldFarm(protocol: string, pool: string, amount: string, chain: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🌾 **DeFi Yield Farm (Demo Mode)**\n\nProtocol: ${protocol}\nPool: ${pool}\nAmount: ${amount}\nChain: ${chain}\nAPY: ~15%\nStatus: ✅ Staked successfully\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Staking ${amount} in ${protocol} ${pool} on ${chain}...` }] };
-  }
-
-  private async nftMint(collection: string, recipient: string, metadataUri: string, chain: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🎨 **NFT Mint (Demo Mode)**\n\nCollection: ${collection}\nRecipient: ${recipient}\nMetadata: ${metadataUri}\nChain: ${chain}\nToken ID: #1337\nStatus: ✅ Minted successfully\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Minting NFT to ${recipient} on ${chain}...` }] };
-  }
-
-  private async nftTransfer(collection: string, tokenId: string, fromAddress: string, toAddress: string, chain: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔄 **NFT Transfer (Demo Mode)**\n\nCollection: ${collection}\nToken ID: ${tokenId}\nFrom: ${fromAddress}\nTo: ${toAddress}\nChain: ${chain}\nStatus: ✅ Transferred\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Transferring NFT ${tokenId} from ${fromAddress} to ${toAddress}...` }] };
-  }
-
-  private async nftMetadata(collection: string, tokenId: string, chain: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔍 **NFT Metadata (Demo Mode)**\n\nCollection: ${collection}\nToken ID: ${tokenId}\nChain: ${chain}\nName: Demo NFT #${tokenId}\nDescription: A demo NFT for testing\nImage: https://example.com/nft.png\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Fetching metadata for NFT ${tokenId} in collection ${collection}...` }] };
-  }
-
-  private async blockExplorer(query: string, chain: string, type?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔍 **Block Explorer (Demo Mode)**\n\nQuery: ${query}\nChain: ${chain}\nType: ${type || 'auto-detect'}\nStatus: ✅ Found\nExplorer: https://etherscan.io/search?q=${query}\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Searching ${chain} explorer for ${query}...` }] };
-  }
-
-  private async gasTracker(chains?: string[], period?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `⛽ **Gas Tracker (Demo Mode)**\n\nChains: ${chains?.join(', ') || 'All'}\nPeriod: ${period || '24h'}\nEthereum: 25 gwei\nBSC: 5 gwei\nPolygon: 35 gwei\nZetaChain: 0.001 ZETA\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Tracking gas prices for ${period || '24h'}...` }] };
-  }
-
-  private async portfolioTracker(addresses: string[], chains?: string[]) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `💼 **Portfolio Tracker (Demo Mode)**\n\nAddresses: ${addresses.length} tracked\nChains: ${chains?.join(', ') || 'All'}\nTotal Value: $12,345.67\nETH: 5.5 ($11,000)\nZETA: 1000 ($500)\nTokens: 25 different\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Tracking portfolio for ${addresses.length} addresses...` }] };
-  }
-
-  private async securityAudit(contractAddress: string, chain: string, analysisType?: string) {
-    if (this.testMode) {
-      return {
-        content: [{
-          type: "text",
-          text: `🔒 **Security Audit (Demo Mode)**\n\nContract: ${contractAddress}\nChain: ${chain}\nAnalysis: ${analysisType || 'basic'}\nStatus: ✅ No major issues found\nScore: 8.5/10\nRecommendations: 3 minor optimizations\n\n${this.getInstallationMessage()}`
-        }]
-      };
-    }
-    return { content: [{ type: "text", text: `Auditing contract ${contractAddress} on ${chain}...` }] };
-  }
-
-  // === Helper method for generic command execution ===
-  private async executeCommand(command: string, args: string[]): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const child = spawn(command, args, {
-        stdio: ['pipe', 'pipe', 'pipe']
-      });
-
-      let stdout = '';
-      let stderr = '';
-
-      child.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-
-      child.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-
-      child.on('close', (code) => {
-        if (code === 0) {
-          resolve(stdout);
-        } else {
-          reject(new Error(`Command failed with code ${code}: ${stderr}`));
-        }
-      });
-
-      child.on('error', (error) => {
-        reject(error);
-      });
-    });
   }
 
   async run() {
