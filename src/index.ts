@@ -12,7 +12,7 @@ import { promisify } from 'util';
 import { testModeResponses } from './test-mode.js';
 
 class ZetaChainMCPServer {
-  private server: Server;
+  public server: Server;
   private testMode: boolean;
 
   constructor() {
@@ -772,9 +772,12 @@ class ZetaChainMCPServer {
 }
 
 // Export for Smithery
-export default function({ config }: { config?: any }) {
+export default function createServer({ config }: { config?: any }) {
   const server = new ZetaChainMCPServer();
-  return server.run();
+  return {
+    server: server.server,
+    run: () => server.run()
+  };
 }
 
 // Direct execution for local testing (CommonJS compatible)
