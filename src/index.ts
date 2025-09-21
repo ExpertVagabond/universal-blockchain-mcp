@@ -771,13 +771,10 @@ class ZetaChainMCPServer {
   }
 }
 
-// Export for Smithery
+// Export for Smithery - return just the server instance
 export default function createServer({ config }: { config?: any }) {
-  const server = new ZetaChainMCPServer();
-  return {
-    server: server.server,
-    run: () => server.run()
-  };
+  const serverInstance = new ZetaChainMCPServer();
+  return serverInstance.server;
 }
 
 // Direct execution for local testing (CommonJS compatible)
