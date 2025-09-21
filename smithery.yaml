@@ -1,63 +1,12 @@
-name: universal-blockchain
-description: "Comprehensive ZetaChain MCP server with full CLI integration for cross-chain blockchain development"
-version: 1.0.0
-author: "ZetaChain Community"
-license: MIT
-runtime: "typescript"
-
-# Build configuration
 build:
-  type: docker
-  dockerfile: Dockerfile
+  dockerBuildPath: .
 
 startCommand:
   type: stdio
   configSchema: {}
   commandFunction: |
-    (config) => {
-      return {
-        command: "node",
-        args: ["dist/index.js"],
-        env: {}
-      };
-    }
-
-# Capabilities
-capabilities:
-  tools: 16
-  transport: ["stdio"]
-
-# Categories
-categories:
-  - blockchain
-  - defi
-  - cross-chain
-  - development-tools
-
-# Keywords
-keywords:
-  - zetachain
-  - blockchain
-  - cross-chain
-  - omnichain
-  - defi
-  - web3
-  - smart-contracts
-
-# Environment
-environment:
-  node: ">=18.0.0"
-
-# Dependencies
-dependencies:
-  npm:
-    - zetachain@latest
-  global:
-    - zetachain  # Auto-installed via npm package
-  system:
-    - foundry  # Includes forge, cast, anvil, chisel for smart contract development
-
-# Test configuration
-test:
-  command: "npm test"
-  timeout: 30000
+    (config) => ({ 
+      command: 'node', 
+      args: ['dist/index.js'], 
+      env: {} 
+    })
