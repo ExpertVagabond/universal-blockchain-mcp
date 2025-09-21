@@ -771,5 +771,14 @@ class ZetaChainMCPServer {
   }
 }
 
-const server = new ZetaChainMCPServer();
-server.run().catch(console.error);
+// Export for Smithery
+export default function({ config }: { config?: any }) {
+  const server = new ZetaChainMCPServer();
+  return server.run();
+}
+
+// Direct execution for local testing (CommonJS compatible)
+if (typeof require !== 'undefined' && require.main === module) {
+  const server = new ZetaChainMCPServer();
+  server.run().catch(console.error);
+}
