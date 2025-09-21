@@ -1,1 +1,5 @@
 runtime: "typescript"
+transport: "stdio"
+remote: true
+description: "Model Context Protocol server for ZetaChain CLI - enables AI assistants to interact with ZetaChain blockchain development tools"
+version: "1.0.1"
