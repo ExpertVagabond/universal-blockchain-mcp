@@ -22,7 +22,6 @@ startCommand:
       };
     }
 
-
 # Capabilities
 capabilities:
   tools: 16
