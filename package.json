@@ -1,6 +1,6 @@
 {
   "name": "@ExpertVagabond/universal-blockchain-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Universal Blockchain MCP server for cross-chain development with ZetaChain, Foundry, and multi-chain support. Supports both remote (demo) and local (full functionality) deployment.",
   "main": "dist/index.js",
   "module": "./src/index.ts",
@@ -58,7 +58,7 @@
     "mcp",
     "blockchain",
     "zetachain",
-    "foundry", 
+    "foundry",
     "cross-chain",
     "omnichain",
     "defi",
