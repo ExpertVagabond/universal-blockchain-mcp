@@ -30,29 +30,66 @@ A comprehensive Model Context Protocol (MCP) server for universal blockchain dev
 - **create_project**: Create new universal contract projects with templates
 - **check_foundry**: Verify Foundry (forge, cast, anvil) installation and versions
 
+### 🔧 **Advanced Tools (50+ Available)**
+- **Foundry Integration**: forge_build, forge_test, forge_create, forge_verify
+- **Cast Operations**: cast_call, cast_send, cast_balance, cast_nonce, cast_gas_price
+- **Anvil Testing**: anvil_start, anvil_snapshot, anvil_revert
+- **ZetaChain Advanced**: validator_create, governance_vote, staking_delegate, staking_rewards
+- **Cross-Chain**: cross_chain_send, cross_chain_status, bridge_status
+- **Smart Contracts**: contract_compile, contract_deploy, contract_interact
+- **DeFi Operations**: defi_swap, defi_liquidity_add, defi_yield_farm
+- **NFT Operations**: nft_mint, nft_transfer, nft_metadata
+- **Wallet Management**: wallet_export, wallet_backup, transaction_history
+- **Security & Analysis**: security_audit, gas_optimizer, multisig_create
+- **Blockchain Tools**: block_explorer, gas_tracker, portfolio_tracker
+
+> **Note**: Advanced tools provide full functionality when installed locally via NPM. Cloud versions provide helpful guidance and installation instructions.
+
 ## Installation
 
-### Method 1: Claude Code CLI (Recommended)
+### 🚀 **Method 1: NPM Package (Recommended for Full Functionality)**
 
+**One-Click Install with Auto-Setup:**
+```bash
+npm install -g @ExpertVagabond/universal-blockchain-mcp
+```
+
+This automatically installs:
+- ✅ ZetaChain CLI globally
+- ✅ Foundry toolkit (forge, cast, anvil)
+- ✅ All 50+ MCP tools with full functionality
+- ✅ Complete development environment
+
+**Usage after installation:**
+```bash
+# Run the MCP server
+universal-blockchain-mcp
+
+# Or use with Claude Desktop
+# Add to Claude Desktop config:
+{
+  "mcpServers": {
+    "universal-blockchain": {
+      "command": "universal-blockchain-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+### 🌐 **Method 2: Smithery Cloud (Hosted)**
+
+**Claude Code CLI:**
 ```bash
 claude mcp add --transport http universal-blockchain "https://server.smithery.ai/@ExpertVagabond/universal-blockchain/mcp"
 ```
 
-### Method 2: Deep Links
-
-**HTTP Transport (Hosted):**
+**Deep Link (HTTP):**
 ```
 claude://mcp/install?name=Universal%20Blockchain%20MCP&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fserver.smithery.ai%2F%40ExpertVagabond%2Funiversal-blockchain%2Fmcp%22%7D
 ```
 
-**stdio Transport (Local):**
-```
-claude://mcp/install?name=Universal%20Blockchain%20MCP&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40smithery%2Fcli%40latest%22%2C%22run%22%2C%22%40ExpertVagabond%2Funiversal-blockchain-mcp%22%5D%7D
-```
-
-### Method 3: Manual Configuration
-
-**HTTP Configuration:**
+**Manual Configuration:**
 ```json
 {
   "type": "http",
@@ -60,12 +97,45 @@ claude://mcp/install?name=Universal%20Blockchain%20MCP&config=%7B%22type%22%3A%2
 }
 ```
 
-**stdio Configuration:**
+### 📦 **Method 3: Other MCP Registries**
+
+**mcp.so Registry:**
+- Visit: https://mcp.so
+- Search: "universal-blockchain-mcp"
+- One-click install available
+
+**PulseMCP Directory:**
+- Visit: https://pulsemcp.com
+- Browse: Blockchain & Web3 category
+- Direct integration with Cursor, Claude, Cline
+
+**Glama Registry:**
+- Visit: https://glama.ai
+- Search: "ZetaChain" or "blockchain"
+- Multi-tool ecosystem integration
+
+**Fleur (Mac + Claude):**
+- Visit: https://fleur.ai
+- Zero-code MCP installation
+- Perfect for non-technical users
+
+### 🔧 **Method 4: Manual Configuration**
+
+**stdio Configuration (Local):**
 ```json
 {
   "type": "stdio", 
   "command": "npx",
-  "args": ["-y", "@smithery/cli@latest", "run", "@ExpertVagabond/universal-blockchain-mcp"]
+  "args": ["-y", "@ExpertVagabond/universal-blockchain-mcp"]
+}
+```
+
+**Custom CLI Path:**
+```json
+{
+  "type": "stdio",
+  "command": "/path/to/universal-blockchain-mcp",
+  "args": []
 }
 ```
 
