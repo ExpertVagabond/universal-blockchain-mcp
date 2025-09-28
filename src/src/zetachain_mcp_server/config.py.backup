@@ -1,0 +1,87 @@
+"""
+Configuration management for ZetaChain MCP Server.
+"""
+
+from dataclasses import dataclass
+from typing import Dict, Any, Optional
+import os
+
+
+@dataclass
+class ZetaChainConfig:
+    """Configuration for ZetaChain MCP Server."""
+    
+    # Network configuration
+    network: str = "athens"  # athens, mainnet, localhost
+    rpc_url: str = "https://zetachain-athens-evm.blockpi.network/v1/rpc/public"
+    gateway_address: str = "0x6c533f7fe93fae114d0954697069df33c9b74fd7"
+    
+    # Cross-chain configuration
+    supported_chains: Dict[str, Dict[str, Any]] = None
+    
+    # Timeout settings
+    timeout: int = 10000  # milliseconds
+    
+    # Wallet settings
+    wallet_storage_path: str = "./data/wallets"
+    
+    def __post_init__(self):
+        """Initialize configuration after dataclass creation."""
+        if self.supported_chains is None:
+            self.supported_chains = {
+                "zetachain": {
+                    "name": "ZetaChain",
+                    "chain_id": 7001,
+                    "rpc_url": self.rpc_url,
+                    "explorer": "https://explorer.zetachain.com",
+                    "native_currency": "ZETA"
+                },
+                "ethereum": {
+                    "name": "Ethereum",
+                    "chain_id": 1,
+                    "rpc_url": "https://eth.llamarpc.com",
+                    "explorer": "https://etherscan.io",
+                    "native_currency": "ETH"
+                },
+                "bsc": {
+                    "name": "BNB Smart Chain",
+                    "chain_id": 56,
+                    "rpc_url": "https://bsc-dataseed.binance.org",
+                    "explorer": "https://bscscan.com",
+                    "native_currency": "BNB"
+                },
+                "polygon": {
+                    "name": "Polygon",
+                    "chain_id": 137,
+                    "rpc_url": "https://polygon-rpc.com",
+                    "explorer": "https://polygonscan.com",
+                    "native_currency": "MATIC"
+                },
+                "bitcoin": {
+                    "name": "Bitcoin",
+                    "chain_id": 0,
+                    "rpc_url": "https://blockstream.info/api",
+                    "explorer": "https://blockstream.info",
+                    "native_currency": "BTC"
+                }
+            }
+        
+        # Override with environment variables if present
+        self.network = os.getenv("ZETACHAIN_NETWORK", self.network)
+        self.rpc_url = os.getenv("ZETACHAIN_RPC_URL", self.rpc_url)
+        self.gateway_address = os.getenv("ZETACHAIN_GATEWAY", self.gateway_address)
+        self.timeout = int(os.getenv("ZETACHAIN_TIMEOUT", str(self.timeout)))
+    
+    def get_chain_config(self, chain_name: str) -> Optional[Dict[str, Any]]:
+        """Get configuration for a specific chain."""
+        return self.supported_chains.get(chain_name.lower())
+    
+    def get_rpc_url(self, chain_name: str) -> Optional[str]:
+        """Get RPC URL for a specific chain."""
+        chain_config = self.get_chain_config(chain_name)
+        return chain_config.get("rpc_url") if chain_config else None
+    
+    def get_explorer_url(self, chain_name: str) -> Optional[str]:
+        """Get explorer URL for a specific chain."""
+        chain_config = self.get_chain_config(chain_name)
+        return chain_config.get("explorer") if chain_config else None

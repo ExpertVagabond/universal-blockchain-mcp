@@ -1,0 +1,656 @@
+#!/bin/bash
+
+# ZetaChain CLI - Real Structure (based on usage statistics)
+ZETACHAIN_MCP_URL="http://localhost:8082/mcp"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Helper function to call MCP server
+call_zetachain() {
+    local tool_name="$1"
+    local arguments="$2"
+    
+    curl -s -X POST "$ZETACHAIN_MCP_URL" \
+        -H "Content-Type: application/json" \
+        -d "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"tools/call\",\"params\":{\"name\":\"$tool_name\",\"arguments\":$arguments}}" | jq -r '.result.content[0].text // .result // .error // "{}"'
+}
+
+# AI Assistant (Most used command - 124 executions)
+zetachain_ask() {
+    local question="$*"
+    if [ -z "$question" ]; then
+        echo -e "${BLUE}🤖 ZetaChain Ask - AI Blockchain Assistant${NC}"
+        echo "Ask me anything about ZetaChain, cross-chain operations, DeFi, or blockchain!"
+        echo ""
+        echo "Examples:"
+        echo "  zetachain ask 'How do I bridge ETH to ZetaChain?'"
+        echo "  zetachain ask 'What are the best DeFi pools?'"
+        echo "  zetachain ask 'How do I structure transfer commands?'"
+        echo "  zetachain ask 'What is the proper format for deposits?'"
+        return
+    fi
+    
+    echo -e "${BLUE}🤖 ZetaChain Ask: $question${NC}"
+    echo ""
+    
+    # Provide contextual responses based on the real CLI usage patterns
+    case "$question" in
+        *"transfer"*|*"withdraw"*|*"deposit"*)
+            echo -e "${GREEN}💰 Transfer/Deposit/Withdraw Commands Structure:${NC}"
+            echo ""
+            echo "🔹 DEPOSITS (Cross-chain to ZetaChain):"
+            echo "  • zetachain solana deposit <amount> <recipient>"
+            echo "  • zetachain evm deposit <amount> <recipient>"
+            echo "  • zetachain sui deposit <amount> <recipient>"
+            echo "  • zetachain bitcoin memo deposit <amount> <recipient> <memo>"
+            echo "  • zetachain ton deposit <amount> <recipient>"
+            echo ""
+            echo "🔹 WITHDRAWALS (ZetaChain to other chains):"
+            echo "  • zetachain zetachain withdraw <chain> <amount> <recipient>"
+            echo "  • zetachain zetachain withdraw-and-call <chain> <amount> <recipient> <data>"
+            echo ""
+            echo "🔹 ADVANCED OPERATIONS:"
+            echo "  • zetachain evm deposit-and-call <amount> <recipient> <data>"
+            echo "  • zetachain solana deposit-and-call <amount> <recipient> <data>"
+            echo "  • zetachain sui deposit-and-call <amount> <recipient> <data>"
+            echo "  • zetachain bitcoin memo call <amount> <recipient> <memo>"
+            echo "  • zetachain bitcoin inscription deposit <amount> <recipient>"
+            echo ""
+            ;;
+        *"account"*|*"wallet"*)
+            echo -e "${GREEN}🔑 Account Management Commands:${NC}"
+            echo ""
+            echo "  • zetachain accounts list           - List all accounts (114 uses)"
+            echo "  • zetachain accounts show <name>    - Show account details (53 uses)"
+            echo "  • zetachain accounts create <name>  - Create new account (24 uses)"
+            echo "  • zetachain accounts import <key>   - Import account (25 uses)"
+            echo "  • zetachain accounts delete <name>  - Delete account (21 uses)"
+            echo ""
+            ;;
+        *"query"*|*"balance"*|*"chain"*)
+            echo -e "${GREEN}📊 Query Commands:${NC}"
+            echo ""
+            echo "  • zetachain query balances <address>     - Check balances (81 uses)"
+            echo "  • zetachain query chains list            - List supported chains (53 uses)"
+            echo "  • zetachain query chains show <chain>    - Show chain details (19 uses)"
+            echo "  • zetachain query cctx <hash>            - Cross-chain tx status (50 uses)"
+            echo "  • zetachain query tokens list            - List tokens (22 uses)"
+            echo "  • zetachain query tokens show <token>    - Show token details (28 uses)"
+            echo "  • zetachain query fees                   - Query fees (13 uses)"
+            echo ""
+            ;;
+        *"localnet"*|*"network"*)
+            echo -e "${GREEN}🌐 Local Network Commands:${NC}"
+            echo ""
+            echo "  • zetachain localnet start    - Start local network (81 uses)"
+            echo "  • zetachain localnet check    - Check network status (70 uses)"
+            echo "  • zetachain localnet stop     - Stop local network (9 uses)"
+            echo ""
+            ;;
+        *"encode"*|*"call"*)
+            echo -e "${GREEN}⚙️ Advanced Operations:${NC}"
+            echo ""
+            echo "  • zetachain solana encode <data>           - Encode Solana data (10 uses)"
+            echo "  • zetachain sui encode <data>              - Encode Sui data (4 uses)"
+            echo "  • zetachain bitcoin inscription encode     - Encode Bitcoin inscription (3 uses)"
+            echo "  • zetachain zetachain call <contract>      - Call ZetaChain contract (14 uses)"
+            echo "  • zetachain evm call <contract>            - Call EVM contract (3 uses)"
+            echo "  • zetachain solana call <program>          - Call Solana program (6 uses)"
+            echo ""
+            ;;
+        *"structure"*|*"format"*|*"command"*)
+            echo -e "${GREEN}📋 ZetaChain CLI Command Structure:${NC}"
+            echo ""
+            echo "The real ZetaChain CLI follows this pattern:"
+            echo ""
+            echo "🔹 SUBCOMMAND STRUCTURE:"
+            echo "  zetachain <category> <action> [parameters]"
+            echo ""
+            echo "🔹 MAIN CATEGORIES:"
+            echo "  • accounts    - Wallet/account management"
+            echo "  • query       - Blockchain queries and data"
+            echo "  • localnet    - Local network operations"
+            echo "  • ask         - AI assistant"
+            echo "  • chat        - Interactive chat"
+            echo "  • docs        - Documentation"
+            echo "  • faucet      - Request test tokens"
+            echo "  • new         - Create new projects"
+            echo "  • run         - Run applications"
+            echo ""
+            echo "🔹 CHAIN-SPECIFIC OPERATIONS:"
+            echo "  • solana      - Solana blockchain operations"
+            echo "  • evm         - EVM-compatible chains"
+            echo "  • sui         - Sui blockchain operations"
+            echo "  • bitcoin     - Bitcoin operations"
+            echo "  • ton         - TON blockchain operations"
+            echo "  • zetachain   - ZetaChain native operations"
+            echo ""
+            ;;
+        *)
+            echo -e "${GREEN}🔍 General ZetaChain Information:${NC}"
+            echo "• ZetaChain is an omnichain blockchain platform"
+            echo "• Supports 6 major blockchains: Ethereum, Bitcoin, BSC, Polygon, Solana, Sui, TON"
+            echo "• Features cross-chain deposits, withdrawals, and smart contract calls"
+            echo "• Use 'zetachain ask' for specific help on any topic"
+            echo ""
+            echo -e "${YELLOW}💡 Most Popular Commands:${NC}"
+            echo "  1. zetachain ask (124 uses) - AI assistant"
+            echo "  2. zetachain accounts list (114 uses)"
+            echo "  3. zetachain query balances (81 uses)"
+            echo "  4. zetachain localnet start (81 uses)"
+            echo "  5. zetachain solana deposit (54 uses)"
+            ;;
+    esac
+    
+    echo ""
+    echo -e "${CYAN}💡 Need more help? Try:${NC}"
+    echo "• zetachain ask 'show me transfer commands'"
+    echo "• zetachain ask 'how do I query balances'"
+    echo "• zetachain ask 'what are the account commands'"
+    echo "• zetachain help"
+}
+
+# Accounts subcommands (2nd most used category)
+accounts_list() {
+    echo -e "${BLUE}📋 Listing accounts...${NC}"
+    local result=$(call_zetachain "list_wallets" "{}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        echo -e "${GREEN}✅ Accounts:${NC}"
+        echo "$result" | jq -r '.result.wallets[]? | "• " + .name + " - " + .address' 2>/dev/null || echo "No accounts found"
+    else
+        echo -e "${RED}❌ Error getting accounts${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+accounts_show() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}❌ Usage: zetachain accounts show <account-name>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}👤 Showing account: $name${NC}"
+    local result=$(call_zetachain "get_wallet_info" "{\"wallet_name\": \"$name\"}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        local wallet=$(echo "$result" | jq -r '.result.wallet')
+        echo -e "${GREEN}✅ Account Details:${NC}"
+        echo "Name: $(echo "$wallet" | jq -r '.name')"
+        echo "Address: $(echo "$wallet" | jq -r '.address')"
+        echo "Chain: $(echo "$wallet" | jq -r '.chain')"
+    else
+        echo -e "${RED}❌ Error getting account details${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+accounts_create() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        echo -e "${RED}❌ Usage: zetachain accounts create <account-name>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}🔑 Creating account: $name${NC}"
+    local result=$(call_zetachain "create_wallet" "{\"name\": \"$name\"}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        echo -e "${GREEN}✅ Account created!${NC}"
+        echo "Address: $(echo "$result" | jq -r '.result.wallet.address')"
+    else
+        echo -e "${RED}❌ Error creating account${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+accounts_import() {
+    local key="$1"
+    local name="$2"
+    if [ -z "$key" ] || [ -z "$name" ]; then
+        echo -e "${RED}❌ Usage: zetachain accounts import <private-key> <account-name>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}📥 Importing account: $name${NC}"
+    local result=$(call_zetachain "import_wallet" "{\"private_key\": \"$key\", \"name\": \"$name\"}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        echo -e "${GREEN}✅ Account imported!${NC}"
+        echo "Address: $(echo "$result" | jq -r '.result.wallet.address')"
+    else
+        echo -e "${RED}❌ Error importing account${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+# Query subcommands (3rd most used category)
+query_balances() {
+    local address="$1"
+    if [ -z "$address" ]; then
+        echo -e "${RED}❌ Usage: zetachain query balances <address-or-account-name>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}💰 Querying balances for: $address${NC}"
+    local result=$(call_zetachain "get_balance" "{\"wallet_name\": \"$address\"}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        local balance=$(echo "$result" | jq -r '.result.balance')
+        echo -e "${GREEN}✅ Balance: $(echo "$balance" | jq -r '.eth') $(echo "$balance" | jq -r '.chain | ascii_upcase')${NC}"
+    else
+        echo -e "${RED}❌ Error querying balance${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+query_chains_list() {
+    echo -e "${BLUE}🔗 Listing supported chains...${NC}"
+    local result=$(call_zetachain "get_supported_chains" "{}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        echo -e "${GREEN}✅ Supported chains:${NC}"
+        echo "$result" | jq -r '.result.chains[] | "• " + .displayName + " (ID: " + (.chainId | tostring) + ")"' 2>/dev/null || echo "No chains found"
+    else
+        echo -e "${RED}❌ Error getting chains${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+query_cctx() {
+    local hash="$1"
+    if [ -z "$hash" ]; then
+        echo -e "${RED}❌ Usage: zetachain query cctx <transaction-hash>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}🔍 Querying cross-chain transaction: $hash${NC}"
+    local result=$(call_zetachain "get_cross_chain_status" "{\"tx_hash\": \"$hash\"}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        local status=$(echo "$result" | jq -r '.result.status')
+        echo -e "${GREEN}✅ Transaction Status: $status${NC}"
+    else
+        echo -e "${RED}❌ Error querying transaction${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+# Localnet subcommands
+localnet_start() {
+    echo -e "${BLUE}🚀 Starting ZetaChain local network...${NC}"
+    echo -e "${YELLOW}⚠️  This would start a local ZetaChain network for development${NC}"
+    echo "Network would be available at: http://localhost:8545"
+    echo "Explorer would be available at: http://localhost:3000"
+    echo -e "${GREEN}✅ Local network started (simulated)${NC}"
+}
+
+localnet_check() {
+    echo -e "${BLUE}🔍 Checking local network status...${NC}"
+    local result=$(call_zetachain "get_network_info" "{}")
+    
+    if echo "$result" | jq -e '.success' > /dev/null 2>/dev/null; then
+        local info=$(echo "$result" | jq -r '.result')
+        echo -e "${GREEN}✅ Network Status:${NC}"
+        echo "Network: $(echo "$info" | jq -r '.name')"
+        echo "Block: $(echo "$info" | jq -r '.blockNumber')"
+        echo "RPC: $(echo "$info" | jq -r '.rpcUrl')"
+    else
+        echo -e "${RED}❌ Network not available${NC}"
+        echo "Raw response: $result"
+    fi
+}
+
+localnet_stop() {
+    echo -e "${BLUE}🛑 Stopping ZetaChain local network...${NC}"
+    echo -e "${YELLOW}⚠️  This would stop the local ZetaChain network${NC}"
+    echo -e "${GREEN}✅ Local network stopped (simulated)${NC}"
+}
+
+# Chain-specific operations
+solana_deposit() {
+    local amount="$1"
+    local recipient="$2"
+    if [ -z "$amount" ] || [ -z "$recipient" ]; then
+        echo -e "${RED}❌ Usage: zetachain solana deposit <amount> <recipient-address>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}🏦 Solana Deposit: $amount SOL → $recipient${NC}"
+    echo -e "${YELLOW}⚠️  This would initiate a cross-chain deposit from Solana to ZetaChain${NC}"
+    echo "Amount: $amount SOL"
+    echo "Recipient: $recipient"
+    echo "Estimated time: 2-5 minutes"
+    echo -e "${GREEN}✅ Deposit initiated (simulated)${NC}"
+}
+
+evm_deposit() {
+    local amount="$1"
+    local recipient="$2"
+    if [ -z "$amount" ] || [ -z "$recipient" ]; then
+        echo -e "${RED}❌ Usage: zetachain evm deposit <amount> <recipient-address>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}🏦 EVM Deposit: $amount ETH → $recipient${NC}"
+    echo -e "${YELLOW}⚠️  This would initiate a cross-chain deposit from EVM chain to ZetaChain${NC}"
+    echo "Amount: $amount ETH"
+    echo "Recipient: $recipient"
+    echo "Estimated time: 1-3 minutes"
+    echo -e "${GREEN}✅ Deposit initiated (simulated)${NC}"
+}
+
+zetachain_withdraw() {
+    local chain="$1"
+    local amount="$2"
+    local recipient="$3"
+    if [ -z "$chain" ] || [ -z "$amount" ] || [ -z "$recipient" ]; then
+        echo -e "${RED}❌ Usage: zetachain zetachain withdraw <target-chain> <amount> <recipient-address>${NC}"
+        return
+    fi
+    
+    echo -e "${BLUE}🏧 ZetaChain Withdraw: $amount ZETA → $chain ($recipient)${NC}"
+    echo -e "${YELLOW}⚠️  This would initiate a withdrawal from ZetaChain to $chain${NC}"
+    echo "Target Chain: $chain"
+    echo "Amount: $amount ZETA"
+    echo "Recipient: $recipient"
+    echo "Estimated time: 2-10 minutes"
+    echo -e "${GREEN}✅ Withdrawal initiated (simulated)${NC}"
+}
+
+# Chat interface
+zetachain_chat() {
+    echo -e "${BLUE}💬 ZetaChain Interactive Chat${NC}"
+    echo "Welcome to ZetaChain Chat! Type 'exit' to quit."
+    echo ""
+    
+    while true; do
+        echo -n -e "${CYAN}zetachain-chat> ${NC}"
+        read -r input
+        
+        case "$input" in
+            "exit"|"quit"|"q")
+                echo -e "${GREEN}👋 Goodbye!${NC}"
+                break
+                ;;
+            "help")
+                echo "Available commands in chat:"
+                echo "  • ask <question>     - Ask AI assistant"
+                echo "  • accounts list      - List accounts"
+                echo "  • query balances     - Check balances"
+                echo "  • help              - Show this help"
+                echo "  • exit              - Exit chat"
+                ;;
+            "accounts list")
+                accounts_list
+                ;;
+            ask*)
+                local question="${input#ask }"
+                zetachain_ask "$question"
+                ;;
+            *)
+                echo -e "${YELLOW}Unknown command: $input${NC}"
+                echo "Type 'help' for available commands or 'exit' to quit."
+                ;;
+        esac
+        echo ""
+    done
+}
+
+# Faucet
+zetachain_faucet() {
+    echo -e "${BLUE}🚰 ZetaChain Testnet Faucet${NC}"
+    echo -e "${YELLOW}⚠️  This would request testnet tokens from the ZetaChain faucet${NC}"
+    echo "Available tokens: ZETA, ETH, BTC, BNB"
+    echo "Daily limit: 10 ZETA per address"
+    echo -e "${GREEN}✅ Faucet request submitted (simulated)${NC}"
+}
+
+# Documentation
+zetachain_docs() {
+    echo -e "${BLUE}📚 ZetaChain Documentation${NC}"
+    echo ""
+    echo "🔗 Official Documentation:"
+    echo "  • Main Docs: https://docs.zetachain.com"
+    echo "  • API Reference: https://docs.zetachain.com/api"
+    echo "  • Tutorials: https://docs.zetachain.com/tutorials"
+    echo "  • GitHub: https://github.com/zeta-chain"
+    echo ""
+    echo "📖 Quick Links:"
+    echo "  • Getting Started: https://docs.zetachain.com/get-started"
+    echo "  • Cross-Chain Guide: https://docs.zetachain.com/cross-chain"
+    echo "  • Smart Contracts: https://docs.zetachain.com/contracts"
+    echo "  • CLI Reference: https://docs.zetachain.com/cli"
+}
+
+# Help function
+show_help() {
+    echo -e "${BLUE}🚀 ZetaChain CLI - Real Command Structure${NC}"
+    echo ""
+    echo -e "${YELLOW}📊 MOST POPULAR COMMANDS (based on usage):${NC}"
+    echo -e "${GREEN}  ask <question>                    ${CYAN}(124 uses)${NC} - AI assistant"
+    echo -e "${GREEN}  accounts list                     ${CYAN}(114 uses)${NC} - List accounts"
+    echo -e "${GREEN}  query balances <address>          ${CYAN}(81 uses)${NC}  - Check balances"
+    echo -e "${GREEN}  localnet start                    ${CYAN}(81 uses)${NC}  - Start local network"
+    echo -e "${GREEN}  localnet check                    ${CYAN}(70 uses)${NC}  - Check network status"
+    echo ""
+    echo -e "${YELLOW}🔑 ACCOUNT MANAGEMENT:${NC}"
+    echo "  accounts list                     List all accounts"
+    echo "  accounts show <name>              Show account details"
+    echo "  accounts create <name>            Create new account"
+    echo "  accounts import <key> <name>      Import account from private key"
+    echo "  accounts delete <name>            Delete account"
+    echo ""
+    echo -e "${YELLOW}📊 QUERY COMMANDS:${NC}"
+    echo "  query balances <address>          Check account balances"
+    echo "  query chains list                 List supported chains"
+    echo "  query chains show <chain>         Show chain details"
+    echo "  query cctx <hash>                 Cross-chain transaction status"
+    echo "  query tokens list                 List available tokens"
+    echo "  query tokens show <token>         Show token details"
+    echo "  query fees                        Query current fees"
+    echo ""
+    echo -e "${YELLOW}🌐 LOCAL NETWORK:${NC}"
+    echo "  localnet start                    Start local ZetaChain network"
+    echo "  localnet check                    Check network status"
+    echo "  localnet stop                     Stop local network"
+    echo ""
+    echo -e "${YELLOW}🏦 CROSS-CHAIN OPERATIONS:${NC}"
+    echo "  solana deposit <amount> <to>      Deposit from Solana"
+    echo "  evm deposit <amount> <to>         Deposit from EVM chains"
+    echo "  sui deposit <amount> <to>         Deposit from Sui"
+    echo "  zetachain withdraw <chain> <amt> <to>  Withdraw to other chains"
+    echo ""
+    echo -e "${YELLOW}🤖 AI & UTILITIES:${NC}"
+    echo "  ask <question>                    AI blockchain assistant"
+    echo "  chat                              Interactive chat mode"
+    echo "  faucet                            Request testnet tokens"
+    echo "  docs                              Open documentation"
+    echo ""
+    echo -e "${YELLOW}❓ HELP:${NC}"
+    echo "  help                              Show this help"
+    echo ""
+    echo -e "${CYAN}💡 Tip: Use 'zetachain ask' for detailed help on any topic!${NC}"
+}
+
+# Main command dispatcher
+case "$1" in
+    # AI Assistant (most used - 124 executions)
+    "ask")
+        shift
+        zetachain_ask "$*"
+        ;;
+    
+    # Account management (2nd category by usage)
+    "accounts")
+        case "$2" in
+            "list")
+                accounts_list
+                ;;
+            "show")
+                accounts_show "$3"
+                ;;
+            "create")
+                accounts_create "$3"
+                ;;
+            "import")
+                accounts_import "$3" "$4"
+                ;;
+            "delete")
+                echo -e "${RED}⚠️  Account deletion not implemented in this demo${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ Usage: zetachain accounts {list|show|create|import|delete}${NC}"
+                ;;
+        esac
+        ;;
+    
+    # Query commands (3rd category by usage)
+    "query")
+        case "$2" in
+            "balances")
+                query_balances "$3"
+                ;;
+            "chains")
+                case "$3" in
+                    "list")
+                        query_chains_list
+                        ;;
+                    "show")
+                        echo -e "${BLUE}🔗 Chain details for: $4${NC}"
+                        echo -e "${YELLOW}⚠️  Chain details not implemented in this demo${NC}"
+                        ;;
+                    *)
+                        echo -e "${RED}❌ Usage: zetachain query chains {list|show}${NC}"
+                        ;;
+                esac
+                ;;
+            "cctx")
+                query_cctx "$3"
+                ;;
+            "tokens")
+                case "$3" in
+                    "list"|"show")
+                        echo -e "${BLUE}🪙 Token $3${NC}"
+                        echo -e "${YELLOW}⚠️  Token commands not implemented in this demo${NC}"
+                        ;;
+                    *)
+                        echo -e "${RED}❌ Usage: zetachain query tokens {list|show}${NC}"
+                        ;;
+                esac
+                ;;
+            "fees")
+                echo -e "${BLUE}💸 Current fees${NC}"
+                echo -e "${YELLOW}⚠️  Fee query not implemented in this demo${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ Usage: zetachain query {balances|chains|cctx|tokens|fees}${NC}"
+                ;;
+        esac
+        ;;
+    
+    # Local network commands (4th most used)
+    "localnet")
+        case "$2" in
+            "start")
+                localnet_start
+                ;;
+            "check")
+                localnet_check
+                ;;
+            "stop")
+                localnet_stop
+                ;;
+            *)
+                echo -e "${RED}❌ Usage: zetachain localnet {start|check|stop}${NC}"
+                ;;
+        esac
+        ;;
+    
+    # Chain-specific operations
+    "solana")
+        case "$2" in
+            "deposit")
+                solana_deposit "$3" "$4"
+                ;;
+            "deposit-and-call"|"call"|"encode")
+                echo -e "${BLUE}⚙️  Solana $2${NC}"
+                echo -e "${YELLOW}⚠️  Advanced Solana operations not implemented in this demo${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ Usage: zetachain solana {deposit|deposit-and-call|call|encode}${NC}"
+                ;;
+        esac
+        ;;
+    
+    "evm")
+        case "$2" in
+            "deposit")
+                evm_deposit "$3" "$4"
+                ;;
+            "deposit-and-call"|"call")
+                echo -e "${BLUE}⚙️  EVM $2${NC}"
+                echo -e "${YELLOW}⚠️  Advanced EVM operations not implemented in this demo${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ Usage: zetachain evm {deposit|deposit-and-call|call}${NC}"
+                ;;
+        esac
+        ;;
+    
+    "zetachain")
+        case "$2" in
+            "withdraw")
+                zetachain_withdraw "$3" "$4" "$5"
+                ;;
+            "withdraw-and-call"|"call")
+                echo -e "${BLUE}⚙️  ZetaChain $2${NC}"
+                echo -e "${YELLOW}⚠️  Advanced ZetaChain operations not implemented in this demo${NC}"
+                ;;
+            *)
+                echo -e "${RED}❌ Usage: zetachain zetachain {withdraw|withdraw-and-call|call}${NC}"
+                ;;
+        esac
+        ;;
+    
+    "sui"|"bitcoin"|"ton")
+        echo -e "${BLUE}⚙️  $1 operations${NC}"
+        echo -e "${YELLOW}⚠️  $1 operations not fully implemented in this demo${NC}"
+        echo "Available: $1 deposit <amount> <recipient>"
+        ;;
+    
+    # Utility commands
+    "chat")
+        zetachain_chat
+        ;;
+    
+    "faucet")
+        zetachain_faucet
+        ;;
+    
+    "docs")
+        zetachain_docs
+        ;;
+    
+    "new"|"run")
+        echo -e "${BLUE}🚀 $1 command${NC}"
+        echo -e "${YELLOW}⚠️  Project $1 not implemented in this demo${NC}"
+        ;;
+    
+    "help"|"--help"|"-h")
+        show_help
+        ;;
+    
+    *)
+        echo -e "${RED}❌ Unknown command: $1${NC}"
+        echo ""
+        show_help
+        ;;
+esac
