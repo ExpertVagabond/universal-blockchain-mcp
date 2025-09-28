@@ -1,5 +1,9 @@
 # Universal Blockchain MCP
 
+> **⚠️ NOTICE**: ZetaChain now provides an **official MCP server** at [`@zeta-chain/cli`](https://smithery.ai/server/@zeta-chain/cli) with **44 tools** and team support. **We recommend using the official version** for production use.
+>
+> **Install Official Version**: `smithery install @zeta-chain/cli --client claude`
+
 A comprehensive Model Context Protocol (MCP) server for universal blockchain development, providing full access to ZetaChain CLI, Foundry, and cross-chain functionality through AI assistants.
 
 ## Features
@@ -47,7 +51,20 @@ A comprehensive Model Context Protocol (MCP) server for universal blockchain dev
 
 ## Installation
 
-### 🚀 **Method 1: NPM Package (Recommended for Full Functionality)**
+### ⭐ **Official ZetaChain MCP (Recommended)**
+
+```bash
+# Install official ZetaChain MCP server (44 tools)
+smithery install @zeta-chain/cli --client claude
+```
+
+**Benefits of Official Version:**
+- ✅ **44 tools** maintained by ZetaChain team
+- ✅ Multi-chain support (EVM, Solana, Sui, Bitcoin, TON)
+- ✅ Production-ready with active development
+- ✅ Official team support and updates
+
+### 🚀 **Alternative: This Custom Implementation**
 
 **One-Click Install with Auto-Setup:**
 ```bash
