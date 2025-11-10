@@ -32,7 +32,7 @@
     "quality": "npm run lint && npm run format:check && npm run type-check && npm run test"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.21.0",
+    "@modelcontextprotocol/sdk": "^1.21.1",
     "ethers": "^6.13.0",
     "zetachain": "^7.4.0",
     "zod": "^4.1.12"
