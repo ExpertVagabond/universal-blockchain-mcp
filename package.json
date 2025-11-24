@@ -35,7 +35,7 @@
     "@modelcontextprotocol/sdk": "^1.22.0",
     "ethers": "^6.13.0",
     "zetachain": "^7.4.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
