@@ -115,43 +115,59 @@ smithery install ./
   }
 
   private async executeViaAPI(command: string): Promise<string> {
+    // Validate command input - only allow known safe patterns
+    if (typeof command !== 'string' || command.length > 1000) {
+      throw new Error('Invalid command input');
+    }
+    // Reject any shell metacharacters to prevent injection
+    if (/[;&|`$(){}\\]/.test(command)) {
+      throw new Error('Command contains disallowed characters');
+    }
+
     // Direct blockchain API calls that work remotely
-    
     if (command.includes('query chains list')) {
       return await this.getChainListFromAPI();
     }
-    
+
     if (command.includes('query tokens list')) {
       return await this.getTokenListFromAPI();
     }
-    
+
     if (command.includes('query balances')) {
       const addressMatch = command.match(/0x[a-fA-F0-9]{40}/);
       if (addressMatch) {
         return await this.getBalancesFromAPI(addressMatch[0]);
       }
+      throw new Error('Valid Ethereum address required for balance query');
     }
-    
+
     if (command.includes('query fees')) {
       return await this.getFeesFromAPI();
     }
-    
+
     if (command.includes('faucet')) {
       const addressMatch = command.match(/0x[a-fA-F0-9]{40}/);
       if (addressMatch) {
         return await this.requestFaucetFromAPI(addressMatch[0]);
       }
+      throw new Error('Valid Ethereum address required for faucet request');
     }
-    
+
     // Default: Return explanation of what would be executed
     throw new Error(`API implementation needed for: ${command}`);
   }
 
   private async executeCLI(args: string[]): Promise<string> {
+    // Validate args to prevent command injection
+    for (const arg of args) {
+      if (typeof arg !== 'string' || /[;&|`$(){}\\]/.test(arg)) {
+        throw new Error('CLI argument contains disallowed characters');
+      }
+    }
     return new Promise((resolve, reject) => {
       // Smart CLI detection: try global first, then npx
-      let zetaCommand, zetaArgs;
-      
+      let zetaCommand: string, zetaArgs: string[];
+
       if (process.env.ZETACHAIN_CLI_PATH) {
         // Use custom path if provided
         zetaCommand = process.env.ZETACHAIN_CLI_PATH;
