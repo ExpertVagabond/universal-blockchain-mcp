@@ -4,6 +4,111 @@ use std::io::BufRead;
 use std::process::Command;
 use tracing::info;
 
+// ── Security Module: Input Validation & Command Injection Prevention ─
+
+/// Maximum length for blockchain addresses
+const MAX_ADDRESS_LENGTH: usize = 128;
+
+/// Maximum length for transaction hashes
+const MAX_HASH_LENGTH: usize = 128;
+
+/// Maximum length for token amounts
+const MAX_AMOUNT_LENGTH: usize = 64;
+
+/// Maximum length for chain identifiers
+const MAX_CHAIN_ID_LENGTH: usize = 64;
+
+/// Maximum JSON-RPC message size (512 KB)
+const MAX_MESSAGE_SIZE: usize = 524_288;
+
+/// Validate a blockchain address (hex or base58, no shell metacharacters)
+fn validate_address(value: &str, field_name: &str) -> Result<String, String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Err(format!("{field_name} is required"));
+    }
+    if trimmed.len() > MAX_ADDRESS_LENGTH {
+        return Err(format!("{field_name} exceeds maximum length"));
+    }
+    if trimmed.contains('\0') {
+        return Err(format!("{field_name} contains null bytes"));
+    }
+    // Only allow alphanumeric chars (hex addresses, base58, etc.)
+    if !trimmed.chars().all(|c| c.is_alphanumeric()) {
+        return Err(format!("{field_name} contains invalid characters"));
+    }
+    Ok(trimmed.to_string())
+}
+
+/// Validate a transaction hash
+fn validate_hash(value: &str, field_name: &str) -> Result<String, String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Err(format!("{field_name} is required"));
+    }
+    if trimmed.len() > MAX_HASH_LENGTH {
+        return Err(format!("{field_name} exceeds maximum length"));
+    }
+    if !trimmed.chars().all(|c| c.is_ascii_hexdigit() || c == 'x') {
+        return Err(format!("{field_name} must be a hex string"));
+    }
+    Ok(trimmed.to_string())
+}
+
+/// Validate a token amount string (numeric, no injection)
+fn validate_amount(value: &str, field_name: &str) -> Result<String, String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Err(format!("{field_name} is required"));
+    }
+    if trimmed.len() > MAX_AMOUNT_LENGTH {
+        return Err(format!("{field_name} exceeds maximum length"));
+    }
+    // Allow digits and a single decimal point
+    if !trimmed.chars().all(|c| c.is_ascii_digit() || c == '.') {
+        return Err(format!("{field_name} must be numeric"));
+    }
+    // Ensure at most one decimal point
+    if trimmed.matches('.').count() > 1 {
+        return Err(format!("{field_name} has invalid numeric format"));
+    }
+    Ok(trimmed.to_string())
+}
+
+/// Validate a chain identifier
+fn validate_chain_id(value: &str, field_name: &str) -> Result<String, String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Ok(String::new()); // chain_id is optional in some cases
+    }
+    if trimmed.len() > MAX_CHAIN_ID_LENGTH {
+        return Err(format!("{field_name} exceeds maximum length"));
+    }
+    if !trimmed.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
+        return Err(format!("{field_name} contains invalid characters"));
+    }
+    Ok(trimmed.to_string())
+}
+
+/// Validate a JSON-RPC message size
+fn validate_message_size(line: &str) -> Result<(), String> {
+    if line.len() > MAX_MESSAGE_SIZE {
+        return Err(format!("Message exceeds maximum size of {MAX_MESSAGE_SIZE} bytes"));
+    }
+    Ok(())
+}
+
+/// Sanitize CLI arguments: reject anything with shell metacharacters
+fn sanitize_cli_arg(arg: &str) -> Result<&str, String> {
+    const DANGEROUS_CHARS: &[char] = &[';', '|', '&', '`', '$', '(', ')', '{', '}', '<', '>', '!', '\\', '\n', '\r', '\0'];
+    if arg.chars().any(|c| DANGEROUS_CHARS.contains(&c)) {
+        return Err(format!("Argument contains dangerous characters: {}", arg.chars().filter(|c| DANGEROUS_CHARS.contains(c)).collect::<String>()));
+    }
+    Ok(arg)
+}
+
+// ── End Security Module ─────────────────────────────────────────────
+
 #[derive(Deserialize)]
 struct JsonRpcRequest {
     jsonrpc: String,
@@ -14,6 +119,10 @@ struct JsonRpcRequest {
 }
 
 fn run_zeta(args: &[&str]) -> Result<String, String> {
+    // Validate all arguments before passing to Command
+    for arg in args {
+        sanitize_cli_arg(arg)?;
+    }
     let output = Command::new("zetachain")
         .args(args)
         .output()
@@ -51,8 +160,11 @@ fn tool_definitions() -> Value {
 fn call_tool(name: &str, args: &Value) -> Result<Value, String> {
     match name {
         "check_balance" => {
-            let addr = args["address"].as_str().ok_or("address required")?;
-            let token = args["token"].as_str().unwrap_or("ZETA");
+            let addr_raw = args["address"].as_str().ok_or("address required")?;
+            let addr = validate_address(addr_raw, "address")?.leak() as &str;
+            let token_raw = args["token"].as_str().unwrap_or("ZETA");
+            let token = validate_chain_id(token_raw, "token")?.leak() as &str;
+            let token: &str = if token.is_empty() { "ZETA" } else { token };
             let out = run_zeta(&["balances", addr, "--denom", token, "--output", "json"])?;
             Ok(json!({"output": out.trim()}))
         }
