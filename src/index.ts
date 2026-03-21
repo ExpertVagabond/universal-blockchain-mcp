@@ -205,7 +205,7 @@ smithery install ./
         if (code === 0) {
           resolve(stdout);
         } else {
-          reject(new Error(`Command failed with code ${code}: ${stderr}`));
+          reject(new Error(`Command failed with code ${code}`));
         }
       });
 
@@ -1309,11 +1309,13 @@ Address: ${address}
             throw new Error(`Unknown tool: ${name}`);
         }
       } catch (error) {
+        const raw = error instanceof Error ? error.message : String(error);
+        const sanitized = raw.replace(/\/[^\s]+/g, '[path]').replace(/[A-Za-z0-9]{20,}/g, '[redacted]').slice(0, 200);
         return {
           content: [
             {
               type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+              text: `Error: ${sanitized}`,
             },
           ],
           isError: true,
@@ -1609,7 +1611,7 @@ Address: ${address}
         content: [
           {
             type: "text",
-            text: `Error checking Foundry: ${error instanceof Error ? error.message : String(error)}`,
+            text: `Error checking Foundry installation`,
           },
         ],
         isError: true,
@@ -1619,7 +1621,7 @@ Address: ${address}
 
   private setupErrorHandling() {
     this.server.onerror = (error) => {
-      console.error("[MCP Error]", error);
+      console.error("[MCP Error]", error instanceof Error ? error.message.slice(0, 200) : "unknown error");
     };
 
     process.on("SIGINT", async () => {

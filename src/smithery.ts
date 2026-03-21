@@ -52,9 +52,9 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
       // Now execute the actual ZetaChain command
       return await executeCLI(args);
     } catch (error) {
-      return `❌ **Error**: ${error instanceof Error ? error.message : String(error)}
-🔧 **Installing ZetaChain CLI + Foundry automatically...**
-Please wait while we set up your complete development environment.`;
+      const raw = error instanceof Error ? error.message : String(error);
+      const sanitized = raw.replace(/\/[^\s]+/g, '[path]').replace(/[A-Za-z0-9]{20,}/g, '[redacted]').slice(0, 200);
+      return `Error: ${sanitized}\nInstalling ZetaChain CLI + Foundry automatically. Please wait while we set up your development environment.`;
     }
   };
 
@@ -122,12 +122,12 @@ Please wait while we set up your complete development environment.`;
         if (code === 0) {
           resolve(stdout);
         } else {
-          reject(new Error(`ZetaChain command failed: ${stderr || 'Unknown error'}`));
+          reject(new Error(`ZetaChain command failed`));
         }
       });
 
       child.on('error', (error: Error) => {
-        reject(new Error(`Failed to execute ZetaChain command: ${error.message}`));
+        reject(new Error(`Failed to execute ZetaChain command`));
       });
     });
   };
@@ -522,13 +522,7 @@ ${balanceOutput}`,
               content: [
                 {
                   type: "text",
-                  text: `🔧 **Foundry Installation Check**:
-❌ **Foundry not found** - Installing automatically...
-
-${error instanceof Error ? error.message : String(error)}
-
-🔧 **Installing complete development environment...**
-Please wait while we set up ZetaChain CLI + Foundry toolkit.`,
+                  text: `Foundry Installation Check: Foundry not found - Installing automatically. Please wait while we set up ZetaChain CLI + Foundry toolkit.`,
                 },
               ],
               isError: false,
@@ -572,7 +566,7 @@ ${output}`,
         content: [
           {
             type: "text",
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            text: `Error: ${(error instanceof Error ? error.message : String(error)).replace(/\/[^\s]+/g, '[path]').replace(/[A-Za-z0-9]{20,}/g, '[redacted]').slice(0, 200)}`,
           },
         ],
         isError: true,
