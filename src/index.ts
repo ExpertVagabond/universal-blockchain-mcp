@@ -11,6 +11,11 @@ import { spawn } from 'child_process';
 import { promisify } from 'util';
 import { testModeResponses } from './test-mode.js';
 
+const sanitizeError = (e: unknown): string => {
+  const msg = e instanceof Error ? e.message : String(e);
+  return msg.replace(/\/[^\s]+/g, '[path]').replace(/[A-Za-z0-9]{20,}/g, '[redacted]').slice(0, 200);
+};
+
 class ZetaChainMCPServer {
   public server: Server;
   private testMode: boolean;
@@ -1309,13 +1314,11 @@ Address: ${address}
             throw new Error(`Unknown tool: ${name}`);
         }
       } catch (error) {
-        const raw = error instanceof Error ? error.message : String(error);
-        const sanitized = raw.replace(/\/[^\s]+/g, '[path]').replace(/[A-Za-z0-9]{20,}/g, '[redacted]').slice(0, 200);
         return {
           content: [
             {
               type: "text",
-              text: `Error: ${sanitized}`,
+              text: `Error: ${sanitizeError(error)}`,
             },
           ],
           isError: true,
@@ -1621,7 +1624,7 @@ Address: ${address}
 
   private setupErrorHandling() {
     this.server.onerror = (error) => {
-      console.error("[MCP Error]", error instanceof Error ? error.message.slice(0, 200) : "unknown error");
+      console.error("[MCP Error]", sanitizeError(error));
     };
 
     process.on("SIGINT", async () => {
@@ -2399,5 +2402,5 @@ export default function createServer({ config }: { config?: any }) {
 // Direct execution for local testing (CommonJS compatible)
 if (typeof require !== 'undefined' && require.main === module) {
   const server = new ZetaChainMCPServer();
-  server.run().catch(console.error);
+  server.run().catch((err) => console.error('Fatal:', sanitizeError(err)));
 }
