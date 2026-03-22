@@ -73,7 +73,7 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
         execSync('npm install -g zetachain@latest --yes --silent', { stdio: 'inherit' });
         console.log('✅ ZetaChain CLI installed successfully!');
       } catch (installError) {
-        throw new Error(`Failed to install ZetaChain CLI: ${installError}`);
+        throw new Error('Failed to install ZetaChain CLI');
       }
     }
 
