@@ -24,15 +24,19 @@ import {
 import { spawn } from 'child_process';
 import { promisify } from 'util';
 import { testModeResponses } from './test-mode.js';
+import {
+  sanitizeError as coreSanitizeError,
+  validateNoInjection,
+} from "@psm/mcp-core-ts";
 
 // ---------------------------------------------------------------------------
-// Security utilities — defined before any handler
+// Security utilities — core sanitization from @psm/mcp-core-ts
 // ---------------------------------------------------------------------------
 
 /** Sanitize error messages to prevent information leakage. */
 const sanitizeError = (e: unknown): string => {
   const msg = e instanceof Error ? e.message : String(e);
-  return msg.replace(/\/[^\s]+/g, '[path]').replace(/[A-Za-z0-9]{20,}/g, '[redacted]').slice(0, 200);
+  return coreSanitizeError(msg, 200);
 };
 
 /** Validate Ethereum-style address format (0x + 40 hex chars). */
