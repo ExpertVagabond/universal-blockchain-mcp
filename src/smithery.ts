@@ -8,6 +8,7 @@ import {
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { spawn } from 'child_process';
+import { DEFAULT_CHAIN_KEY, resolveChain, resolveRpcUrl } from './chains.js';
 
 // Session configuration schema for Smithery (JSON Schema Draft 07)
 export const configSchema = {
@@ -454,23 +455,43 @@ export default function createZetaChainMCPServer({ sessionId, config }: { sessio
             isError: false,
           };
 
-        case "get_network_info":
+        case "get_network_info": {
+          // Registry-driven so this cannot drift from the real supported set. The
+          // block height is genuinely live; a scan-time stub would have to invent one.
+          const chain = resolveChain(toolArgs?.network) ?? resolveChain(DEFAULT_CHAIN_KEY)!;
+          const rpcUrl = resolveRpcUrl(chain);
+          let latestBlock: number | null = null;
+          try {
+            const res = await fetch(rpcUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jsonrpc: '2.0', method: 'eth_blockNumber', params: [], id: 1 }),
+              signal: AbortSignal.timeout(10000),
+            });
+            const parsed = parseInt((await res.json()).result, 16);
+            latestBlock = Number.isFinite(parsed) ? parsed : null;
+          } catch {
+            latestBlock = null;
+          }
           return {
             content: [
               {
                 type: "text",
                 text: JSON.stringify({
-                  network: "ZetaChain Testnet",
-                  chainId: 7001,
-                  rpcUrl: "https://zetachain-athens-evm.blockpi.network/v1/rpc/public",
-                  latestBlock: 12804082,
-                  status: "healthy",
-                  explorerUrl: "https://athens3.explorer.zetachain.com"
+                  network: chain.name,
+                  chainId: chain.chainId,
+                  rpcUrl,
+                  latestBlock,
+                  status: latestBlock === null ? "unreachable" : "healthy",
+                  testnet: chain.testnet,
+                  nativeCurrency: chain.nativeCurrency,
+                  explorerUrl: chain.explorerUrl ?? null
                 }, null, 2),
               },
             ],
             isError: false,
           };
+        }
 
         case "get_balances":
           const balanceOutput = await executeZetaCommand(['query', 'balances', toolArgs.address]);
