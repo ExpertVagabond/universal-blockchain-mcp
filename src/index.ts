@@ -25,6 +25,13 @@ import { spawn } from 'child_process';
 import { promisify } from 'util';
 import { testModeResponses } from './test-mode.js';
 import {
+  ACCEPTED_NETWORK_VALUES,
+  CHAINS,
+  DEFAULT_CHAIN_KEY,
+  resolveChain,
+  resolveRpcUrl,
+} from './chains.js';
+import {
   sanitizeError as coreSanitizeError,
   validateNoInjection,
 } from "@psm/mcp-core-ts";
@@ -257,39 +264,47 @@ smithery install ./
 
   // API Implementation Methods for Remote Operation
   private async getChainListFromAPI(): Promise<string> {
-    try {
-      const response = await fetch('https://zetachain-athens-evm.blockpi.network/v1/rpc/public', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'eth_chainId',
-          params: [],
-          id: 1
-        })
-      });
-      
-      const data = await response.json();
-      const chainId = parseInt(data.result, 16);
-      
-      return `🌐 **Live Chain Data**
-┌──────────┬────────────────────┬─────────────────────────────────────────┐
-│ Chain ID │ Chain Name         │ RPC Endpoint                           │
-├──────────┼────────────────────┼─────────────────────────────────────────┤
-│ ${chainId}      │ zeta_testnet       │ zetachain-athens-evm.blockpi.network   │
-│ 97       │ bsc_testnet        │ bsc-testnet.public.blastapi.io          │
-│ 11155111 │ sepolia_testnet    │ sepolia.infura.io                       │
-└──────────┴────────────────────┴─────────────────────────────────────────┘`;
-    } catch {
-      return `⚠️ Unable to fetch live data, using cached info:
-┌──────────┬────────────────────┬───────┐
-│ Chain ID │ Chain Name         │ Status│
-├──────────┼────────────────────┼───────┤
-│ 7001     │ zeta_testnet       │ Active│
-│ 97       │ bsc_testnet        │ Active│
-│ 11155111 │ sepolia_testnet    │ Active│
-└──────────┴────────────────────┴───────┘`;
-    }
+    // Registry-driven: probe every configured chain concurrently and report live
+    // reachability. Previously this returned a hardcoded table listing chains the
+    // server had no way to talk to.
+    const chains = Object.values(CHAINS);
+    const rows = await Promise.all(
+      chains.map(async (chain) => {
+        const rpcUrl = resolveRpcUrl(chain);
+        try {
+          const response = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_blockNumber',
+              params: [],
+              id: 1
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+          const data = await response.json();
+          const block = parseInt(data.result, 16);
+          return Number.isFinite(block)
+            ? { chain, status: `healthy @ ${block}` }
+            : { chain, status: 'unreachable' };
+        } catch {
+          return { chain, status: 'unreachable' };
+        }
+      })
+    );
+
+    const pad = (s: string, n: number) => s.length > n ? s.slice(0, n - 1) + '…' : s.padEnd(n);
+    const lines = rows.map(({ chain, status }) =>
+      `│ ${pad(String(chain.chainId), 8)} │ ${pad(chain.key, 20)} │ ${pad(chain.nativeCurrency.symbol, 6)} │ ${pad(status, 24)} │`
+    );
+
+    return `🌐 **Supported Chains** (live)
+┌──────────┬──────────────────────┬────────┬──────────────────────────┐
+│ Chain ID │ Network              │ Native │ Status                   │
+├──────────┼──────────────────────┼────────┼──────────────────────────┤
+${lines.join('\n')}
+└──────────┴──────────────────────┴────────┴──────────────────────────┘`;
   }
 
   private async getTokenListFromAPI(): Promise<string> {
@@ -631,15 +646,15 @@ Address: ${address}
         // Network Info
         {
           name: "get_network_info",
-          description: "Get current ZetaChain network status and information",
+          description: "Get live status and configuration for any supported network (chain ID, RPC, latest block, native currency, explorer)",
           inputSchema: {
             type: "object",
             properties: {
               network: {
                 type: "string",
-                description: "Network to query (mainnet or testnet)",
-                enum: ["mainnet", "testnet"],
-                default: "testnet"
+                description: `Network to query. Accepts a registry key, alias, or chain ID. Supported: ${Object.values(CHAINS).map((c) => `${c.key} (${c.chainId})`).join(", ")}`,
+                enum: ACCEPTED_NETWORK_VALUES,
+                default: DEFAULT_CHAIN_KEY
               }
             }
           }
@@ -1558,14 +1573,17 @@ Address: ${address}
     };
   }
 
-  private async getNetworkInfo(network: string = "testnet") {
-    try {
-      const rpcUrl = network === "mainnet" 
-        ? "https://zetachain-evm.blockpi.network/v1/rpc/public"
-        : "https://zetachain-athens-evm.blockpi.network/v1/rpc/public";
-      
-      const chainId = network === "mainnet" ? 7000 : 7001;
+  private async getNetworkInfo(network: string = DEFAULT_CHAIN_KEY) {
+    const chain = resolveChain(network);
+    if (!chain) {
+      throw new Error(
+        `Unknown network "${network}". Valid values: ${ACCEPTED_NETWORK_VALUES.join(", ")}`,
+      );
+    }
+    const rpcUrl = resolveRpcUrl(chain);
+    const chainId = chain.chainId;
 
+    try {
       const response = await fetch(rpcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1585,14 +1603,14 @@ Address: ${address}
           {
             type: "text",
             text: JSON.stringify({
-              network: `ZetaChain ${network.charAt(0).toUpperCase() + network.slice(1)}`,
+              network: chain.name,
               chainId,
               rpcUrl,
               latestBlock,
               status: "healthy",
-              explorerUrl: network === "mainnet" 
-                ? "https://explorer.zetachain.com" 
-                : "https://athens3.explorer.zetachain.com"
+              testnet: chain.testnet,
+              nativeCurrency: chain.nativeCurrency,
+              explorerUrl: chain.explorerUrl ?? null
             }, null, 2),
           },
         ],
