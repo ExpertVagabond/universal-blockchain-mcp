@@ -1,23 +1,35 @@
-// Test mode responses for Smithery scanning
+// Test mode responses for Smithery scanning.
+//
+// These are deliberately static — Smithery scans the server without network access,
+// so nothing here may make a call. The chain table is generated from the registry at
+// module load rather than hand-written, which keeps it offline while making it
+// impossible for the fixture to drift from the real supported-chain set.
+import { CHAINS } from './chains.js';
+
+const pad = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s.padEnd(n));
+
+const chainTableRows = Object.values(CHAINS)
+  .map(
+    (c) =>
+      `│ ${pad(String(c.chainId), 8)} │ ${pad(c.key, 20)} │ ${pad(c.nativeCurrency.symbol, 6)} │ ${pad(c.testnet ? 'testnet' : 'mainnet', 8)} │`,
+  )
+  .join('\n');
+
 export const testModeResponses = {
   list_chains: {
     content: [
       {
         type: "text",
         text: `Supported chains:
-┌──────────┬────────────────────┬───────┬──────────────────────────────────┐
-│ Chain ID │ Chain Name         │ Count │ Tokens                           │
-├──────────┼────────────────────┼───────┼──────────────────────────────────┤
-│ 97       │ bsc_testnet        │ 20    │ USDC.BSC, BNB.BSC                │
-├──────────┼────────────────────┼───────┼──────────────────────────────────┤
-│ 7001     │ zeta_testnet       │ 3     │ -                                │
-├──────────┼────────────────────┼───────┼──────────────────────────────────┤
-│ 11155111 │ sepolia_testnet    │ 14    │ ETH.ETHSEP, USDC.ETHSEP          │
-└──────────┴────────────────────┴───────┴──────────────────────────────────┘`
+┌──────────┬──────────────────────┬────────┬──────────┐
+│ Chain ID │ Network              │ Native │ Kind     │
+├──────────┼──────────────────────┼────────┼──────────┤
+${chainTableRows}
+└──────────┴──────────────────────┴────────┴──────────┘`
       }
     ]
   },
-  
+
   list_tokens: {
     content: [
       {
