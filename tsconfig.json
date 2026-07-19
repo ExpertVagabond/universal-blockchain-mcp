@@ -11,7 +11,11 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    // Declared explicitly rather than relying on automatic @types discovery, which
+    // TypeScript 6 no longer performs the way 5.x did — without this, every use of
+    // process/Buffer/require and the jest globals fails to resolve.
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
