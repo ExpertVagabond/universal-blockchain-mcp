@@ -36,6 +36,10 @@ export interface ChainConfig {
   aliases?: string[];
 }
 
+// Robinhood Chain is deliberately absent: it has its own dedicated server
+// (robinhood-chain-mcp) and its own facilitator (x402-facilitator-evm), each
+// carrying its own definitions. This package is a ZetaChain client; the registry
+// exists to remove hardcoded ternaries, not to become a universal chain list.
 export const CHAINS: Record<string, ChainConfig> = {
   "zetachain-mainnet": {
     key: "zetachain-mainnet",
@@ -59,30 +63,6 @@ export const CHAINS: Record<string, ChainConfig> = {
     nativeCurrency: { name: "Zeta", symbol: "aZETA", decimals: 18 },
     testnet: true,
     aliases: ["testnet", "zeta_testnet", "athens"],
-  },
-  robinhood: {
-    key: "robinhood",
-    name: "Robinhood Chain",
-    chainId: 4663,
-    rpcUrl: "https://rpc.mainnet.chain.robinhood.com/",
-    explorerUrl: "https://robinhoodchain.blockscout.com",
-    explorerName: "Blockscout",
-    // Arbitrum Orbit L2 settling on Ethereum; gas is paid in ETH, not a custom token.
-    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-    testnet: false,
-    aliases: ["robinhood-mainnet", "rh"],
-  },
-  "robinhood-testnet": {
-    key: "robinhood-testnet",
-    name: "Robinhood Chain Testnet",
-    chainId: 46630,
-    rpcUrl: "https://rpc.testnet.chain.robinhood.com/",
-    // No public explorer found for testnet as of 2026-07: the obvious
-    // robinhoodchain-testnet.blockscout.com host 404s. Left unset deliberately
-    // rather than shipping a dead link.
-    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-    testnet: true,
-    aliases: ["rh-testnet"],
   },
   "base-sepolia": {
     key: "base-sepolia",
