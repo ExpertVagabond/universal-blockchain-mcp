@@ -31,10 +31,10 @@ import {
   resolveChain,
   resolveRpcUrl,
 } from './chains.js';
-import {
-  sanitizeError as coreSanitizeError,
-  validateNoInjection,
-} from "@psm/mcp-core-ts";
+// Vendored from @psm/mcp-core-ts — see src/vendor/mcp-core-ts/PROVENANCE.md.
+// The package is unpublished, so a file: dependency broke CI; the source now
+// lives in-repo. validateNoInjection was previously imported but unused; dropped.
+import { sanitizeError as coreSanitizeError } from "./vendor/mcp-core-ts/index.js";
 
 // ---------------------------------------------------------------------------
 // Security utilities — core sanitization from @psm/mcp-core-ts
