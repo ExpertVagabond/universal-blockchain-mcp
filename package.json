@@ -35,13 +35,11 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@psm/mcp-core-ts": "file:../psm-mcp-core-ts",
-    "ethers": "^6.16.0",
-    "zetachain": "^7.4.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^25.2.2",
     "@types/jest": "^30.0.0",
+    "@types/node": "^25.2.2",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
     "eslint": "^10.0.0",
@@ -49,9 +47,6 @@
     "prettier": "^3.8.1",
     "ts-jest": "^29.4.6",
     "typescript": "^6.0.2"
-  },
-  "peerDependencies": {
-    "zetachain": ">=6.0.0"
   },
   "engines": {
     "node": ">=18"
