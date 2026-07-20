@@ -12,7 +12,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20, 22, 24]
     
     steps:
     - uses: actions/checkout@v7
@@ -41,15 +41,17 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
-    
+    - uses: actions/checkout@v4
+
     - name: Run security audit
       run: npm audit --audit-level moderate
-    
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
-      with:
-        languages: javascript
+
+    # CodeQL was previously invoked here as a bare `analyze` step with a `languages`
+    # input, which is invalid — analyze requires a prior `init`, and it failed every
+    # run with "Has the 'init' action been called?". Rather than hand-roll init+analyze
+    # (which conflicts with CodeQL Default Setup if that is enabled on the repo),
+    # enable scanning via Settings > Code security > CodeQL analysis > Default setup.
+    # This job now gates on `npm audit` alone, which is a real, passing check.
 
   release:
     needs: [ci, security]
