@@ -12,14 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     steps:
+      # Auto-merge waits for the required status checks (ci 20/22/24) on its
+      # own. main requires no approving reviews, so there is nothing further
+      # for this job to do — and GITHUB_TOKEN is not permitted to approve a
+      # pull request in any case:
+      #
+      #   failed to create review: GraphQL: GitHub Actions is not permitted
+      #   to approve pull requests. (addPullRequestReview)
+      #
+      # That restriction is deliberate — a workflow that could approve would
+      # let a PR satisfy its own review requirement — so the fix is to drop
+      # the step, not to hand the job a PAT.
       - name: Enable auto-merge for Dependabot PRs
         run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          
-      - name: Approve PR
-        run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
