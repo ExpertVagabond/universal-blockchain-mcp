@@ -12,6 +12,19 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    ignore:
+      # @typescript-eslint/eslint-plugin declares peer typescript ">=4.8.4
+      # <6.1.0", and its ts-api-utils dependency agrees, so anything at or above
+      # 6.1 makes `npm ci` fail with ERESOLVE before a single file compiles.
+      # Dependabot cannot know that and re-raised the same unmergeable
+      # TypeScript 7 PR every week; nothing in this repo can satisfy it.
+      #
+      # This is a hold, not a decision: remove it once @typescript-eslint ships
+      # a release whose peer range accepts the newer TypeScript, then take the
+      # bump in one go. Check with:
+      #   npm view @typescript-eslint/eslint-plugin peerDependencies
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
